@@ -1,146 +1,72 @@
 #include "queue.h"
 #include "tile_game.h"
-#define MAX_QUEUE_SIZE 1024  // Maximum size of the queue (adjustable)
 
-// Queue structure
-struct queue {
-    uint64_t data[MAX_QUEUE_SIZE];  // Array to hold serialized game states
-    int front;                      // Index of the front element in the queue
-    int rear;                       // Index of the rear element in the queue
-    int size;                       // Current number of elements in the queue
-};
-
-// Initialize the queue
-void init_queue(struct queue *q) {
-    q->front = 0;
-    q->rear = 0;
-    q->size = 0;
-}
-
-// Check if the queue is empty
-int is_empty(struct queue *q) {
-    return q->size == 0;
-}
-
-// Check if the queue is full
-int is_full(struct queue *q) {
-    return q->size == MAX_QUEUE_SIZE;
-}
-
-// Enqueue function: Adds a game_state to the queue by serializing it
+// Function to enqueue a game state into the queue
 void enqueue(struct queue *q, struct game_state state) {
-    // Check if the queue is full
-    if (is_full(q)) {
-        return;  // Can't enqueue if the queue is full
-    }
+    // Serialize the game state into an integer
+    size_t serialized_state = serialize(state);
 
-    // Serialize the game_state to an integer and add it to the rear of the queue
-    q->data[q->rear] = serialize(state);
-    q->rear = (q->rear + 1) % MAX_QUEUE_SIZE;  // Move rear to the next position (circular)
-    q->size++;
+    // Insert the serialized state at the tail of the linked list
+    insert_at_tail(&q->data, serialized_state);
 }
 
-// Dequeue function: Removes and returns the first game_state from the queue
+// Function to dequeue a game state from the queue
 struct game_state dequeue(struct queue *q) {
-    // Check if the queue is empty
-    if (is_empty(q)) {
-        return (struct game_state){0};  // Return an empty game state if the queue is empty
+    if (q->data.head == NULL) {
+        // If the queue is empty, return an invalid game state (perhaps a sentinel value)
+        struct game_state invalid_state;
+        invalid_state.board = NULL; // Set this to NULL or an invalid state representation
+        return invalid_state;
     }
 
-    // Get the serialized state from the front of the queue
-    uint64_t serialized_state = q->data[q->front];
-    q->front = (q->front + 1) % MAX_QUEUE_SIZE;  // Move front to the next position (circular)
-    q->size--;
+    // Remove the serialized state from the head of the list
+    size_t serialized_state = remove_from_head(&q->data);
 
-    // Deserialize the serialized state back into a game_state structure
-    return deserialize(serialized_state);
+    // Deserialize the integer back into a game state
+    struct game_state state = deserialize(serialized_state);
+
+    return state;
 }
 
-// Helper function: Perform BFS to find the number of moves required to solve the puzzle
+// Function to calculate the number of moves needed to solve the puzzle (bfs or some heuristic)
 int number_of_moves(struct game_state start) {
-    // Initialize the queue
-    struct queue q;
-    init_queue(&q);  // Initialize the queue with no elements
+    // Assuming this function uses BFS (Breadth-First Search) to determine the shortest path
+    // to the solved state. You can implement BFS here, utilizing the queue for traversal.
 
-    // Enqueue the starting state
+    struct queue q;
+    q.data.head = NULL;  // Initialize an empty queue (linked list)
+    
+    // Enqueue the start state with 0 moves
     enqueue(&q, start);
 
-    // Set of visited states (using a simple array for simplicity)
-    uint64_t visited[MAX_QUEUE_SIZE] = {0};  // Array to track visited states
+    // Create a set or list to track visited states (you can use a hash table or array)
+    // This part is pseudo-code to illustrate:
+    // initialize_visited_set();
 
-    // Perform BFS
-    while (!is_empty(&q)) {
-        struct game_state current_state = dequeue(&q);  // Dequeue the next state
+    while (q.data.head != NULL) {
+        // Dequeue the current state
+        struct game_state current_state = dequeue(&q);
 
-        // Check if we've reached the goal state (solved puzzle)
+        // Check if the current state is the goal state (solved puzzle)
         if (is_solved(current_state)) {
-            return current_state.num_steps;  // Return the number of steps taken
+            return current_state.moves; // Return the number of moves when the goal is found
         }
 
-        // Generate the possible next moves (up, down, left, right)
-        struct game_state next_states[4] = {
-            current_state,  // Initialize with the current state
-        };
+        // Generate possible moves and enqueue them
+        // For each possible move, create a new game state
+        for (int i = 0; i < num_possible_moves(current_state); i++) {
+            struct game_state next_state = make_move(current_state, i); // Generate next state
 
-        // Make possible moves (assuming we are modifying the current state within each function)
-        move_up(&next_states[0]);
-        move_down(&next_states[1]);
-        move_left(&next_states[2]);
-        move_right(&next_states[3]);
+            // If this state hasn't been visited, enqueue it
+            // if (!visited(next_state)) {
+            enqueue(&q, next_state);
+            // }
 
-        // Enqueue valid and not visited states
-        for (int i = 0; i < 4; i++) {
-            if (is_new_state(next_states[i], visited)) {
-                enqueue(&q, next_states[i]);  // Enqueue the new state
-                insert_to_visited(visited, next_states[i]);  // Mark as visited
-            }
+            // Update visited set (add next_state to the visited list)
+            // visited_add(next_state);
         }
     }
 
-    // Return -1 if no solution is found (in case the puzzle is unsolvable)
-    return -1;
-}
-
-// Utility function to check if the state is solved (target configuration)
-bool is_solved(struct game_state state) {
-    int target[4][4] = {
-        {1, 2, 3, 4},
-        {5, 6, 7, 8},
-        {9, 10, 11, 12},
-        {13, 14, 15, 0}  // The empty space (0) in the bottom-right corner
-    };
-
-    // Compare the current state to the target state
-    for (int row = 0; row < 4; row++) {
-        for (int col = 0; col < 4; col++) {
-            if (state.tiles[row][col] != target[row][col]) {
-                return false;  // Return false if any tile is out of place
-            }
-        }
-    }
-
-    return true;  // Return true if the board matches the target state
-}
-
-// Check if a state has been visited (by comparing serialized states)
-bool is_new_state(struct game_state state, uint64_t *visited) {
-    size_t serialized_state = serialize(state);
-
-    // Traverse the visited states array to check if the state is already visited
-    for (int i = 0; i < MAX_QUEUE_SIZE; i++) {
-        if (visited[i] == serialized_state) {
-            return false;  // Return false if the state is already visited
-        }
-    }
-
-    return true;  // Return true if the state has not been visited
-}
-void insert_to_visited(uint64_t *visited, struct game_state state) {
-    size_t serialized_state = serialize(state);
-    for (int i = 0; i < MAX_QUEUE_SIZE; i++) {
-        if (visited[i] == 0) {  // Find an empty spot in the visited array
-            visited[i] = serialized_state;
-            break;
-        }
-    }
+    // If the goal state is not reachable (shouldn't happen in a solvable puzzle)
+    return -1;  // Return -1 indicating failure or unreachable state
 }
