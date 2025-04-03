@@ -1,102 +1,100 @@
 #include "linked_list.h"
 
 #include <stdlib.h>
-#include <stdio.h>
 
-// Create and return a new node with the given value
-struct list_node *new_node(size_t value) {
-    struct list_node *node = malloc(sizeof(struct list_node));
+
+struct list_node* new_node(size_t value) {
+    struct list_node* node = (struct list_node*)malloc(sizeof(struct list_node));
     if (node == NULL) {
-        return NULL; // Memory allocation failed
+        // Memory allocation failed, return NULL
+        return NULL;
     }
     node->value = value;
     node->next = NULL;
     return node;
 }
 
-// Insert a node at the head of the linked list
-void insert_at_head(struct linked_list *list, size_t value) {
-    struct list_node *new_node_ptr = new_node(value);
-    if (new_node_ptr == NULL) {
-        return; // Failed to allocate memory
+// Insert a node at the head of the list
+void insert_at_head(struct linked_list* list, size_t value) {
+    struct list_node* new_node = new_node(value);
+    if (new_node == NULL) {
+        // Return if memory allocation failed
+        return;
     }
-
-    if (list->head == NULL) {
-        // If the list is empty, the new node is both the head and tail
-        list->head = new_node_ptr;
-    } else {
-        // Insert the new node at the head
-        new_node_ptr->next = list->head;
-        list->head = new_node_ptr;
-    }
+    new_node->next = list->head;
+    list->head = new_node;
 }
 
-// Insert a node at the tail of the linked list
-void insert_at_tail(struct linked_list *list, size_t value) {
-    struct list_node *new_node_ptr = new_node(value);
-    if (new_node_ptr == NULL) {
-        return; // Failed to allocate memory
+// Insert a node at the tail of the list
+void insert_at_tail(struct linked_list* list, size_t value) {
+    struct list_node* new_node = new_node(value);
+    if (new_node == NULL) {
+        // Return if memory allocation failed
+        return;
     }
 
     if (list->head == NULL) {
-        // If the list is empty, the new node is both the head and tail
-        list->head = new_node_ptr;
+        // If the list is empty, the new node becomes the head
+        list->head = new_node;
     } else {
-        // Traverse to the last node and insert the new node
-        struct list_node *current = list->head;
+        // Otherwise, traverse to the tail and insert
+        struct list_node* current = list->head;
         while (current->next != NULL) {
             current = current->next;
         }
-        current->next = new_node_ptr;
+        current->next = new_node;
     }
 }
 
-// Remove and return the value from the head of the linked list
-size_t remove_from_head(struct linked_list *list) {
+// Remove a node from the head of the list
+size_t remove_from_head(struct linked_list* list) {
     if (list->head == NULL) {
-        return 0; // Return 0 for empty list (no value to return)
+        // List is empty, return an error code (e.g., SIZE_MAX)
+        return (size_t)-1;  // Return an error code or sentinel value
     }
-
-    struct list_node *old_head = list->head;
-    size_t value = old_head->value;
-    list->head = old_head->next;
-
-    free(old_head);
+    struct list_node* temp = list->head;
+    size_t value = temp->value;
+    list->head = list->head->next;
+    free(temp);
     return value;
 }
 
-// Remove and return the value from the tail of the linked list
-size_t remove_from_tail(struct linked_list *list) {
+// Remove a node from the tail of the list
+size_t remove_from_tail(struct linked_list* list) {
     if (list->head == NULL) {
-        return 0; // Return 0 for empty list (no value to return)
+        // List is empty, return an error code (e.g., SIZE_MAX)
+        return (size_t)-1;  // Return an error code or sentinel value
     }
 
+    // If there's only one node in the list
     if (list->head->next == NULL) {
-        // If there's only one node in the list
         size_t value = list->head->value;
         free(list->head);
         list->head = NULL;
         return value;
     }
 
-    // Traverse the list to find the second-to-last node
-    struct list_node *current = list->head;
-    while (current->next != NULL && current->next->next != NULL) {
+    // Otherwise, traverse to the second-to-last node
+    struct list_node* current = list->head;
+    while (current->next && current->next->next) {
         current = current->next;
     }
 
-    // Remove the tail node
     size_t value = current->next->value;
     free(current->next);
     current->next = NULL;
-
     return value;
 }
 
-void free_list(struct linked_list *list) {
-    while (list->head != NULL) {
-        remove_from_head(list);
+// Free the entire list
+void free_list(struct linked_list* list) {
+    struct list_node* current = list->head;
+    while (current != NULL) {
+        struct list_node* temp = current;
+        current = current->next;
+        free(temp);
     }
+    list->head = NULL;
 }
 // Utility function to help you debugging, do not modify
 void dump_list(FILE *fp, struct linked_list list) {
