@@ -14,7 +14,7 @@ struct list_node* new_node(size_t value) {
 }
 
 // Insert a node at the head of the list
-void insert_at_head(struct linked_list* list, size_t value) {
+void insert_at_head(struct linked_list *list, size_t value) {
     struct list_node* new_node_ptr = new_node(value);  // Renamed to avoid conflict with function name
     if (new_node_ptr == NULL) {
         return;
@@ -24,7 +24,7 @@ void insert_at_head(struct linked_list* list, size_t value) {
 }
 
 // Insert a node at the tail of the list
-void insert_at_tail(struct linked_list* list, size_t value) {
+void insert_at_tail(struct linked_list *list, size_t value) {
     struct list_node* new_node_ptr = new_node(value);  // Renamed to avoid conflict with function name
     if (new_node_ptr == NULL) {
         return;
@@ -44,7 +44,7 @@ void insert_at_tail(struct linked_list* list, size_t value) {
 }
 
 // Remove a node from the head of the list
-size_t remove_from_head(struct linked_list* list) {
+size_t remove_from_head(struct linked_list *list) {
     if (list->head == NULL) {
         // List is empty, return an error code (e.g., SIZE_MAX)
         return (size_t)-1;  // Return an error code or sentinel value
@@ -57,7 +57,7 @@ size_t remove_from_head(struct linked_list* list) {
 }
 
 // Remove a node from the tail of the list
-size_t remove_from_tail(struct linked_list* list) {
+size_t remove_from_tail(struct linked_list *list) {
     if (list->head == NULL) {
         // List is empty, return an error code (e.g., SIZE_MAX)
         return (size_t)-1;  // Return an error code or sentinel value
@@ -84,20 +84,20 @@ size_t remove_from_tail(struct linked_list* list) {
 }
 
 // Free the entire list
-void free_list(struct linked_list* list) {
-    struct list_node* current = list->head;
+void free_list(struct linked_list list) {
+    struct list_node* current = list.head;
     while (current != NULL) {
         struct list_node* temp = current;
         current = current->next;
         free(temp);
     }
-    list->head = NULL;  // Set head to NULL to indicate an empty list
+    list.head = NULL;  // Set head to NULL to indicate an empty list
 }
 
 // Utility function to dump the list for debugging purposes
-void dump_list(FILE *fp, struct linked_list* list) {
+void dump_list(FILE *fp, struct linked_list list) {
     fprintf(fp, "[ ");
-    for (struct list_node *cur = list->head; cur != NULL; cur = cur->next) {
+    for (struct list_node *cur = list.head; cur != NULL; cur = cur->next) {
         fprintf(fp, "%zu ", cur->value);
     }
     fprintf(fp, "]\n");
