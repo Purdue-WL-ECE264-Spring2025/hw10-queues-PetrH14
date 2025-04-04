@@ -1,5 +1,5 @@
 #include "queue.h"
-#include "tile_game.h"    // For game-related functions (is_solved, make_move, etc.)
+#include "tile_game.h"    // Include tile_game.h for game-related functions
 #include <stdlib.h>        // For malloc and free
 #include "linked_list.h"   // For struct list_node and linked list functions
 
@@ -35,7 +35,7 @@ void enqueue(struct queue *q, struct game_state state) {
 struct game_state dequeue(struct queue *q) {
     // Check if the queue is empty
     if (q->data.head == NULL) {
-        struct game_state invalid_state = {{0}}; // Return an invalid state if the queue is empty
+        struct game_state invalid_state = {0}; // Return an invalid state if the queue is empty
         return invalid_state;
     }
 
