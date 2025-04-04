@@ -73,14 +73,69 @@ struct game_state dequeue(struct queue *q) {
     return state;
 }
 
+// Check if a state has been visited (helps avoid revisiting states)
+int is_visited(struct linked_list *visited, uint64_t state) {
+    struct list_node *current = visited->head;
+    while (current != NULL) {
+        if (current->value == state) {
+            return 1; // State already visited
+        }
+        current = current->next;
+    }
+    return 0; // State not visited
+}
+
+// Add a state to the visited list
+void add_to_visited(struct linked_list *visited, uint64_t state) {
+    insert_at_tail(visited, state);  // Insert serialized state at the tail of the visited list
+}
+
+// Generate possible next moves and enqueue them
+void generate_possible_moves(struct game_state *state, struct queue *q, struct linked_list *visited) {
+    struct game_state new_state = *state;  // Create a copy of the current state
+
+    // Try all four possible moves
+    move_up(&new_state);
+    if (!is_visited(visited, serialize(new_state))) {
+        add_to_visited(visited, serialize(new_state));
+        enqueue(q, new_state);
+    }
+
+    new_state = *state;  // Reset to the original state
+    move_down(&new_state);
+    if (!is_visited(visited, serialize(new_state))) {
+        add_to_visited(visited, serialize(new_state));
+        enqueue(q, new_state);
+    }
+
+    new_state = *state;  // Reset to the original state
+    move_left(&new_state);
+    if (!is_visited(visited, serialize(new_state))) {
+        add_to_visited(visited, serialize(new_state));
+        enqueue(q, new_state);
+    }
+
+    new_state = *state;  // Reset to the original state
+    move_right(&new_state);
+    if (!is_visited(visited, serialize(new_state))) {
+        add_to_visited(visited, serialize(new_state));
+        enqueue(q, new_state);
+    }
+}
+
 // Number of moves function (without is_solved, num_possible_moves, and make_move)
 int number_of_moves(struct game_state start) {
     // Initialize the queue
     struct queue q;
     q.data.head = NULL;  // Initialize empty queue
 
+    // Initialize the visited list
+    struct linked_list visited;
+    visited.head = NULL;
+
     // Enqueue the starting state
     enqueue(&q, start);
+    add_to_visited(&visited, serialize(start));  // Add the start state to the visited list
 
     // Example process for tracking the number of moves
     int num_moves = 0;
@@ -96,6 +151,9 @@ int number_of_moves(struct game_state start) {
 
         num_moves++; // Increment the move count
 
+        // Generate possible moves and enqueue them
+        generate_possible_moves(&current_state, &q, &visited);
+
         // Print the state for debugging (optional)
         printf("Move %d: ", num_moves);
         for (int i = 0; i < 4; i++) {
@@ -104,9 +162,6 @@ int number_of_moves(struct game_state start) {
             }
             printf("\n");
         }
-
-        // Here you can add the logic to generate possible moves and enqueue them.
-        // But for now, it will just stop when it encounters the solved state.
     }
 
     return num_moves; // Return the number of moves processed
