@@ -2,8 +2,7 @@
 #include "tile_game.h"    // Include tile_game.h for game-related functions
 #include <stdlib.h>        // For malloc and free
 #include "linked_list.h"   // For struct list_node and linked list functions
-#include <stdint.h>        // For uint64_t type
-#include <stdio.h> 
+#include <string.h>        // For memcpy (if needed for copying states)
 
 // Check if the current state is solved (goal state)
 int is_solved(struct game_state *state) {
@@ -74,6 +73,32 @@ struct game_state dequeue(struct queue *q) {
     return state;
 }
 
+// Function to generate possible moves and enqueue them
+void generate_possible_moves(struct queue *q, struct game_state current_state) {
+    struct game_state next_state;
+    
+    // Try all possible moves (up, down, left, right)
+    if (move_up(&current_state)) {
+        next_state = current_state;
+        enqueue(q, next_state);
+    }
+    
+    if (move_down(&current_state)) {
+        next_state = current_state;
+        enqueue(q, next_state);
+    }
+
+    if (move_left(&current_state)) {
+        next_state = current_state;
+        enqueue(q, next_state);
+    }
+
+    if (move_right(&current_state)) {
+        next_state = current_state;
+        enqueue(q, next_state);
+    }
+}
+
 // Number of moves function (without is_solved, num_possible_moves, and make_move)
 int number_of_moves(struct game_state start) {
     // Initialize the queue
@@ -83,11 +108,7 @@ int number_of_moves(struct game_state start) {
     // Enqueue the starting state
     enqueue(&q, start);
 
-    // Set up a visited set to avoid revisiting states
-    std::set<uint64_t> visited;
-    uint64_t serialized_start = serialize(start);
-    visited.insert(serialized_start); // Mark the start state as visited
-
+    // Example process for tracking the number of moves
     int num_moves = 0;
 
     // While the queue is not empty
@@ -102,7 +123,7 @@ int number_of_moves(struct game_state start) {
         num_moves++; // Increment the move count
 
         // Print the state for debugging (optional)
-        printf("Move %d: ", num_moves);
+        printf("Move %d: \n", num_moves);
         for (int i = 0; i < 4; i++) {
             for (int j = 0; j < 4; j++) {
                 printf("%d ", current_state.tiles[i][j]);
@@ -110,45 +131,8 @@ int number_of_moves(struct game_state start) {
             printf("\n");
         }
 
-        // Generate possible moves and enqueue them
-        struct game_state next_state;
-
-        // Try all possible moves (up, down, left, right)
-        if (move_up(&current_state)) {
-            next_state = current_state;
-            uint64_t serialized_state = serialize(next_state);
-            if (visited.find(serialized_state) == visited.end()) {
-                enqueue(&q, next_state);
-                visited.insert(serialized_state);
-            }
-        }
-
-        if (move_down(&current_state)) {
-            next_state = current_state;
-            uint64_t serialized_state = serialize(next_state);
-            if (visited.find(serialized_state) == visited.end()) {
-                enqueue(&q, next_state);
-                visited.insert(serialized_state);
-            }
-        }
-
-        if (move_left(&current_state)) {
-            next_state = current_state;
-            uint64_t serialized_state = serialize(next_state);
-            if (visited.find(serialized_state) == visited.end()) {
-                enqueue(&q, next_state);
-                visited.insert(serialized_state);
-            }
-        }
-
-        if (move_right(&current_state)) {
-            next_state = current_state;
-            uint64_t serialized_state = serialize(next_state);
-            if (visited.find(serialized_state) == visited.end()) {
-                enqueue(&q, next_state);
-                visited.insert(serialized_state);
-            }
-        }
+        // Generate possible moves and enqueue the resulting states
+        generate_possible_moves(&q, current_state);
     }
 
     return num_moves; // Return the number of moves processed
