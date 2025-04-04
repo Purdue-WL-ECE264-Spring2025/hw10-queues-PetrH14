@@ -5,18 +5,6 @@
 #include <stdint.h>
 #include <stdio.h>
 
-// Check if a state has already been visited by checking the visited list
-int is_visited(struct linked_list *visited, uint64_t state) {
-    struct list_node *current = visited->head;
-    while (current != NULL) {
-        if (current->value == state) {
-            return 1; // State has been visited
-        }
-        current = current->next;
-    }
-    return 0; // State has not been visited
-}
-
 // Check if the state is solved by comparing the tiles with the target solved state
 int is_solved(struct game_state *state) {
     int correct[4][4] = {
@@ -38,7 +26,16 @@ int is_solved(struct game_state *state) {
 }
 
 // Check if a state has already been visited by checking the visited list
-
+int is_visited(struct linked_list *visited, uint64_t state) {
+    struct list_node *current = visited->head;
+    while (current != NULL) {
+        if (current->value == state) {
+            return 1; // State has been visited
+        }
+        current = current->next;
+    }
+    return 0; // State has not been visited
+}
 
 // Number of moves function with state exploration
 int number_of_moves(struct game_state start) {
@@ -128,7 +125,6 @@ int number_of_moves(struct game_state start) {
                 insert_at_tail(&visited, serialized_state);  // Add to visited list
             }
         }
-
         // Move right
         if (empty_col < 3) {
             next_state = current_state;
