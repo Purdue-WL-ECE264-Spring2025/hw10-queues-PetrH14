@@ -89,6 +89,28 @@ void add_to_visited(struct linked_list *visited, uint64_t state) {
     insert_at_tail(visited, state);  // Insert serialized state at the tail of the visited list
 }
 
+// Free the visited list and its nodes
+void free_visited(struct linked_list *visited) {
+    struct list_node *current = visited->head;
+    while (current != NULL) {
+        struct list_node *to_free = current;
+        current = current->next;
+        free(to_free);  // Free each node
+    }
+    visited->head = NULL;  // Set head to NULL after freeing all nodes
+}
+
+// Free the queue and its nodes
+void free_queue(struct queue *q) {
+    struct list_node *current = q->data.head;
+    while (current != NULL) {
+        struct list_node *to_free = current;
+        current = current->next;
+        free(to_free);  // Free each node
+    }
+    q->data.head = NULL;  // Set head to NULL after freeing all nodes
+}
+
 // Generate possible next moves and enqueue them
 void generate_possible_moves(struct game_state *state, struct queue *q, struct linked_list *visited) {
     struct game_state new_state = *state;  // Create a copy of the current state
@@ -153,6 +175,9 @@ int number_of_moves(struct game_state start) {
 
         // If the current state is solved, stop processing
         if (is_solved(&current_state)) {
+            // Clean up memory before returning
+            free_queue(&q);
+            free_visited(&visited);
             return num_moves; // Return the number of moves when solved
         }
 
@@ -170,6 +195,10 @@ int number_of_moves(struct game_state start) {
             printf("\n");
         }
     }
+
+    // Clean up memory before returning
+    free_queue(&q);
+    free_visited(&visited);
 
     return num_moves; // Return the number of moves processed
 }
