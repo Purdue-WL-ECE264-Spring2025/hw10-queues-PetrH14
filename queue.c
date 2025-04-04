@@ -72,6 +72,28 @@ struct game_state dequeue(struct queue *q) {
     return state;
 }
 
+// Generate possible moves from the current state and enqueue them
+void generate_possible_moves(struct queue *q, struct game_state current_state) {
+    struct game_state next_state;
+    
+    // Try all possible moves (up, down, left, right)
+    move_up(&current_state);
+    next_state = current_state;
+    enqueue(q, next_state);
+    
+    move_down(&current_state);
+    next_state = current_state;
+    enqueue(q, next_state);
+
+    move_left(&current_state);
+    next_state = current_state;
+    enqueue(q, next_state);
+
+    move_right(&current_state);
+    next_state = current_state;
+    enqueue(q, next_state);
+}
+
 // Number of moves function (without is_solved, num_possible_moves, and make_move)
 int number_of_moves(struct game_state start) {
     // Initialize the queue
@@ -104,8 +126,8 @@ int number_of_moves(struct game_state start) {
             printf("\n");
         }
 
-        // Here you can add the logic to generate possible moves and enqueue them.
-        // But for now, it will just stop when it encounters the solved state.
+        // Generate possible moves and enqueue the resulting states
+        generate_possible_moves(&q, current_state);
     }
 
     return num_moves; // Return the number of moves processed
