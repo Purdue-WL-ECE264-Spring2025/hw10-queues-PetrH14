@@ -81,7 +81,11 @@ int number_of_moves(struct game_state start) {
     // Enqueue the starting state
     enqueue(&q, start);
 
-    // Example process for tracking the number of moves
+    // Set up a visited set to avoid revisiting states
+    std::set<uint64_t> visited;
+    uint64_t serialized_start = serialize(start);
+    visited.insert(serialized_start); // Mark the start state as visited
+
     int num_moves = 0;
 
     // While the queue is not empty
@@ -104,8 +108,45 @@ int number_of_moves(struct game_state start) {
             printf("\n");
         }
 
-        // Here you can add the logic to generate possible moves and enqueue them.
-        // But for now, it will just stop when it encounters the solved state.
+        // Generate possible moves and enqueue them
+        struct game_state next_state;
+
+        // Try all possible moves (up, down, left, right)
+        if (move_up(&current_state)) {
+            next_state = current_state;
+            uint64_t serialized_state = serialize(next_state);
+            if (visited.find(serialized_state) == visited.end()) {
+                enqueue(&q, next_state);
+                visited.insert(serialized_state);
+            }
+        }
+
+        if (move_down(&current_state)) {
+            next_state = current_state;
+            uint64_t serialized_state = serialize(next_state);
+            if (visited.find(serialized_state) == visited.end()) {
+                enqueue(&q, next_state);
+                visited.insert(serialized_state);
+            }
+        }
+
+        if (move_left(&current_state)) {
+            next_state = current_state;
+            uint64_t serialized_state = serialize(next_state);
+            if (visited.find(serialized_state) == visited.end()) {
+                enqueue(&q, next_state);
+                visited.insert(serialized_state);
+            }
+        }
+
+        if (move_right(&current_state)) {
+            next_state = current_state;
+            uint64_t serialized_state = serialize(next_state);
+            if (visited.find(serialized_state) == visited.end()) {
+                enqueue(&q, next_state);
+                visited.insert(serialized_state);
+            }
+        }
     }
 
     return num_moves; // Return the number of moves processed
