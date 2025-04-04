@@ -77,11 +77,11 @@ int is_visited(struct linked_list *visited, uint64_t state) {
     struct list_node *current = visited->head;
     while (current != NULL) {
         if (current->value == state) {
-            return 1;
+            return 1;  // State already visited
         }
         current = current->next;
     }
-    return 0;
+    return 0;  // State not visited
 }
 
 // Add a state to the visited list
