@@ -37,6 +37,16 @@ int is_visited(struct linked_list *visited, uint64_t state) {
     return 0; // State has not been visited
 }
 
+void enqueue(struct queue *q, struct game_state state) {
+    insert_at_tail(&q->data, serialize(state));
+}
+
+// Dequeue a state from the queue
+struct game_state dequeue(struct queue *q) {
+    size_t serialized_state = remove_from_head(&q->data);
+    return deserialize(serialized_state);
+}
+
 // Number of moves function with state exploration
 int number_of_moves(struct game_state start) {
     // Initialize the queue
