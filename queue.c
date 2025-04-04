@@ -16,17 +16,6 @@ int is_visited(struct linked_list *visited, uint64_t state) {
     }
     return 0; // State has not been visited
 }
-2. Update the queue.c Code
-With the is_visited function in place, the number_of_moves function should work as expected. The modified queue.c should look like this:
-
-c
-Copy
-#include "queue.h"
-#include "tile_game.h"
-#include <stdlib.h>
-#include "linked_list.h"
-#include <stdint.h>
-#include <stdio.h>
 
 // Check if the state is solved by comparing the tiles with the target solved state
 int is_solved(struct game_state *state) {
