@@ -23,6 +23,11 @@ int is_solved(struct game_state *state) {
     return 1; // Solved
 }
 
+extern void move_up(struct game_state *state);
+extern void move_down(struct game_state *state);
+extern void move_left(struct game_state *state);
+extern void move_right(struct game_state *state);
+
 // Enqueue a new state into the queue
 void enqueue(struct queue *q, struct game_state state) {
     // Serialize the game state to store it in the linked list
@@ -175,7 +180,7 @@ void generate_possible_moves(struct game_state *state, struct queue *q, struct l
     // Try all four possible moves (up, down, left, right)
     
     // Move up
-    move_up(&new_state);
+    move_up(&new_state);  // Uses move_up from tile_game.c
     if (!is_visited(visited, serialize(new_state))) {
         add_to_visited(visited, serialize(new_state));
         enqueue(q, new_state);
@@ -184,7 +189,7 @@ void generate_possible_moves(struct game_state *state, struct queue *q, struct l
     new_state = *state;  // Reset to the original state
 
     // Move down
-    move_down(&new_state);
+    move_down(&new_state);  // Uses move_down from tile_game.c
     if (!is_visited(visited, serialize(new_state))) {
         add_to_visited(visited, serialize(new_state));
         enqueue(q, new_state);
@@ -193,7 +198,7 @@ void generate_possible_moves(struct game_state *state, struct queue *q, struct l
     new_state = *state;  // Reset to the original state
 
     // Move left
-    move_left(&new_state);
+    move_left(&new_state);  // Uses move_left from tile_game.c
     if (!is_visited(visited, serialize(new_state))) {
         add_to_visited(visited, serialize(new_state));
         enqueue(q, new_state);
@@ -202,13 +207,12 @@ void generate_possible_moves(struct game_state *state, struct queue *q, struct l
     new_state = *state;  // Reset to the original state
 
     // Move right
-    move_right(&new_state);
+    move_right(&new_state);  // Uses move_right from tile_game.c
     if (!is_visited(visited, serialize(new_state))) {
         add_to_visited(visited, serialize(new_state));
         enqueue(q, new_state);
     }
 }
-
 // Number of moves function (without is_solved, num_possible_moves, and make_move)
 int number_of_moves(struct game_state start) {
     // Initialize the queue
