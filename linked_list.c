@@ -17,7 +17,7 @@ struct list_node* new_node(size_t value) {
 void insert_at_head(struct linked_list* list, size_t value) {
     struct list_node* new_node_ptr = new_node(value);  // Renamed to avoid conflict with function name
     if (new_node_ptr == NULL) {
-        return;  // Return unchanged list if memory allocation failed
+        return;
     }
     new_node_ptr->next = list->head;
     list->head = new_node_ptr;
@@ -27,7 +27,7 @@ void insert_at_head(struct linked_list* list, size_t value) {
 void insert_at_tail(struct linked_list* list, size_t value) {
     struct list_node* new_node_ptr = new_node(value);  // Renamed to avoid conflict with function name
     if (new_node_ptr == NULL) {
-        return;  // Return unchanged list if memory allocation failed
+        return;
     }
 
     if (list->head == NULL) {
@@ -84,7 +84,7 @@ size_t remove_from_tail(struct linked_list* list) {
 }
 
 // Free the entire list
-void free_list(struct linked_list list) {
+void free_list(struct linked_list* list) {
     struct list_node* current = list->head;
     while (current != NULL) {
         struct list_node* temp = current;
@@ -95,9 +95,9 @@ void free_list(struct linked_list list) {
 }
 
 // Utility function to dump the list for debugging purposes
-void dump_list(FILE *fp, struct linked_list list) {
+void dump_list(FILE *fp, struct linked_list* list) {
     fprintf(fp, "[ ");
-    for (struct list_node *cur = list.head; cur != NULL; cur = cur->next) {
+    for (struct list_node *cur = list->head; cur != NULL; cur = cur->next) {
         fprintf(fp, "%zu ", cur->value);
     }
     fprintf(fp, "]\n");
