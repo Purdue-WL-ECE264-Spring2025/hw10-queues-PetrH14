@@ -3,6 +3,26 @@
 #include <stdlib.h>        // For malloc and free
 #include "linked_list.h"   // For struct list_node and linked list functions
 
+// Check if the current state is solved (goal state)
+int is_solved(struct game_state *state) {
+    uint8_t goal_state[4][4] = {
+        {1, 2, 3, 4},
+        {5, 6, 7, 8},
+        {9, 10, 11, 12},
+        {13, 14, 15, 0}
+    };
+
+    // Compare the current state with the goal state
+    for (int i = 0; i < 4; i++) {
+        for (int j = 0; j < 4; j++) {
+            if (state->tiles[i][j] != goal_state[i][j]) {
+                return 0; // Not solved
+            }
+        }
+    }
+    return 1; // Solved
+}
+
 // Enqueue a new state into the queue
 void enqueue(struct queue *q, struct game_state state) {
     // Serialize the game state to store it in the linked list
@@ -64,12 +84,18 @@ int number_of_moves(struct game_state start) {
     // Example process for tracking the number of moves
     int num_moves = 0;
 
-    // While the queue is not empty (basic example, no solving logic)
+    // While the queue is not empty
     while (q.data.head != NULL) {
         struct game_state current_state = dequeue(&q);
 
-        // Just for demonstration: Print the current state and increment the move count
-        // You can replace this with your own logic to process the state.
+        // If the current state is solved, stop processing
+        if (is_solved(&current_state)) {
+            return num_moves; // Return the number of moves when solved
+        }
+
+        num_moves++; // Increment the move count
+
+        // Print the state for debugging (optional)
         printf("Move %d: ", num_moves);
         for (int i = 0; i < 4; i++) {
             for (int j = 0; j < 4; j++) {
@@ -78,11 +104,9 @@ int number_of_moves(struct game_state start) {
             printf("\n");
         }
 
-        num_moves++; // Just an example of incrementing moves
-
-        // If you need to add more logic here for processing states, you can.
-        // For now, this loop just increments the move count and prints the state.
+        // Here you can add the logic to generate possible moves and enqueue them.
+        // But for now, it will just stop when it encounters the solved state.
     }
 
-    return num_moves; // Return number of moves processed
+    return num_moves; // Return the number of moves processed
 }
