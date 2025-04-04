@@ -4,13 +4,6 @@
 // Define the maximum size of the queue (adjust as needed)
 #define MAX_QUEUE_SIZE 1024
 
-// Define the queue structure in queue.c
-struct queue {
-    size_t data[MAX_QUEUE_SIZE];  // Array to hold the serialized states
-    int front;                    // Front index for the queue
-    int rear;                     // Rear index for the queue
-};
-
 // Initialize the queue (reset front and rear)
 void init_queue(struct queue *q) {
     q->front = 0;
@@ -30,16 +23,6 @@ int is_full(struct queue *q) {
 // Enqueue a game state into the queue
 void enqueue(struct queue *q, struct game_state state) {
     size_t serialized_state = serialize(state);
-
-    // Check if the state has already been visited (prevent loops)
-    // Use the visited array to avoid revisiting states.
-    if (visited[serialized_state] == 1) {
-        // State already visited, skipping enqueue.
-        return;
-    }
-
-    // Mark the state as visited
-    visited[serialized_state] = 1;
 
     // Check if there’s space in the queue
     if (!is_full(q)) {
@@ -65,17 +48,15 @@ struct game_state dequeue(struct queue *q) {
     return state;
 }
 
-// Function to check if the puzzle is solved (implementation needed)
+// Function to check if the puzzle is solved (implement the logic as needed)
 int is_solved(struct game_state state) {
-    // Define the logic for checking if the puzzle is solved
-    // Assuming 0 represents the empty tile, and the solved state is known.
-    // Here is a simple comparison to a solved state (customize as necessary):
     int solved[4][4] = {
         {1, 2, 3, 4},
         {5, 6, 7, 8},
         {9, 10, 11, 12},
-        {13, 14, 15, 0}
+        {13, 14, 15, 0}  // 0 represents the empty tile
     };
+
     for (int i = 0; i < 4; i++) {
         for (int j = 0; j < 4; j++) {
             if (state.tiles[i][j] != solved[i][j]) {
@@ -167,7 +148,7 @@ int number_of_moves(struct game_state start) {
         for (int i = 0; i < num_possible_moves(current_state); i++) {
             struct game_state next_state = make_move(current_state, i);  // Generate next state
 
-            // Enqueue the next state if it has not been visited yet
+            // Enqueue the next state
             enqueue(&q, next_state);
         }
     }
