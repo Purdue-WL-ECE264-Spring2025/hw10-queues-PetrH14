@@ -110,6 +110,16 @@ void generate_possible_moves(struct game_state *state, struct queue *q, struct l
     }
 }
 
+// Debugging helper function to print state details
+void print_state(struct game_state *state) {
+    for (int i = 0; i < 4; i++) {
+        for (int j = 0; j < 4; j++) {
+            printf("%d ", state->tiles[i][j]);
+        }
+        printf("\n");
+    }
+}
+
 // Number of moves function
 int number_of_moves(struct game_state start) {
     struct queue q = {0};
@@ -124,6 +134,7 @@ int number_of_moves(struct game_state start) {
         struct game_state current_state = dequeue(&q);
 
         if (is_solved(&current_state)) {
+            printf("Solved after %d moves\n", num_moves);
             free_node_list(q.data.head);
             free_node_list(visited.head);
             return num_moves;
