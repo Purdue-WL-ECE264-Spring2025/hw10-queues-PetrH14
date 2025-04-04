@@ -151,7 +151,13 @@ int number_of_moves(struct game_state start) {
         printf("\n");
 
         // Debugging: Print the number of visited states
-        printf("Visited states: %d\n", visited.size);
+        int visited_count = 0;
+        struct list_node *node = visited.head;
+        while (node != NULL) {
+            visited_count++;
+            node = node->next;
+        }
+        printf("Visited states: %d\n", visited_count);
     }
 
     free_queue(&q);
