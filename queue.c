@@ -104,17 +104,17 @@ void free_queue(struct queue *q) {
 // Generate possible next moves and enqueue them
 void generate_possible_moves(struct game_state *state, struct queue *q, struct linked_list *visited) {
     struct game_state new_state;
-    
+
+    // Array of movement functions
     void (*moves[])(struct game_state*) = {move_up, move_down, move_left, move_right};
 
     for (int i = 0; i < 4; i++) {
         new_state = *state;  // Copy the current state
-        moves[i](&new_state);
+        moves[i](&new_state); // Apply the move (move_up, move_down, move_left, move_right)
 
-        uint64_t serialized_state = serialize(new_state);
-
-        if (!is_visited(visited, serialized_state)) {
-            add_to_visited(visited, serialized_state);
+        // If the new state has not been visited, enqueue it
+        if (!is_visited(visited, serialize(new_state))) {
+            add_to_visited(visited, serialize(new_state));
             enqueue(q, new_state);
         }
     }
@@ -125,19 +125,12 @@ int number_of_moves(struct game_state start) {
     struct queue q = {0};
     struct linked_list visited = {0};
 
-    // Check if the start state is already solved
-    if (is_solved(&start)) {
-        return 0;  // No moves required
-    }
-
     enqueue(&q, start);
     add_to_visited(&visited, serialize(start));
 
     int num_moves = 0;
-    int max_moves = 1000;  // Set a maximum number of moves to avoid infinite loop
-    int move_limit_reached = 0;
 
-    while (q.data.head != NULL && !move_limit_reached) {
+    while (q.data.head != NULL) {
         struct game_state current_state = dequeue(&q);
 
         if (is_solved(&current_state)) {
@@ -147,21 +140,11 @@ int number_of_moves(struct game_state start) {
         }
 
         num_moves++;
-        
-        if (num_moves >= max_moves) {
-            move_limit_reached = 1; // Stop if we've exceeded the max move limit
-            break;
-        }
-
         generate_possible_moves(&current_state, &q, &visited);
     }
 
     free_queue(&q);
     free_visited(&visited);
-
-    if (move_limit_reached) {
-        return -1;  // Indicating failure to find a solution
-    }
 
     return num_moves;
 }
