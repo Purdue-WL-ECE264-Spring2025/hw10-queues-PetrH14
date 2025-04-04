@@ -23,11 +23,6 @@ int is_solved(struct game_state *state) {
     return 1; // Solved
 }
 
-extern void move_up(struct game_state *state);
-extern void move_down(struct game_state *state);
-extern void move_left(struct game_state *state);
-extern void move_right(struct game_state *state);
-
 // Enqueue a new state into the queue
 void enqueue(struct queue *q, struct game_state state) {
     // Serialize the game state to store it in the linked list
@@ -129,7 +124,49 @@ void find_blank(struct game_state *state, int *row, int *col) {
     }
 }
 
+// Move up: Only if the empty space is not in the first row
+void move_up(struct game_state *state) {
+    int row, col;
+    find_blank(state, &row, &col);
+    if (row > 0) {  // Ensure we're not in the first row
+        // Swap the blank space with the tile above
+        state->tiles[row][col] = state->tiles[row-1][col];
+        state->tiles[row-1][col] = 0;
+    }
+}
 
+// Move down: Only if the empty space is not in the last row
+void move_down(struct game_state *state) {
+    int row, col;
+    find_blank(state, &row, &col);
+    if (row < 3) {  // Ensure we're not in the last row
+        // Swap the blank space with the tile below
+        state->tiles[row][col] = state->tiles[row+1][col];
+        state->tiles[row+1][col] = 0;
+    }
+}
+
+// Move left: Only if the empty space is not in the first column
+void move_left(struct game_state *state) {
+    int row, col;
+    find_blank(state, &row, &col);
+    if (col > 0) {  // Ensure we're not in the first column
+        // Swap the blank space with the tile on the left
+        state->tiles[row][col] = state->tiles[row][col-1];
+        state->tiles[row][col-1] = 0;
+    }
+}
+
+// Move right: Only if the empty space is not in the last column
+void move_right(struct game_state *state) {
+    int row, col;
+    find_blank(state, &row, &col);
+    if (col < 3) {  // Ensure we're not in the last column
+        // Swap the blank space with the tile on the right
+        state->tiles[row][col] = state->tiles[row][col+1];
+        state->tiles[row][col+1] = 0;
+    }
+}
 
 // Generate possible next moves and enqueue them
 void generate_possible_moves(struct game_state *state, struct queue *q, struct linked_list *visited) {
@@ -138,7 +175,7 @@ void generate_possible_moves(struct game_state *state, struct queue *q, struct l
     // Try all four possible moves (up, down, left, right)
     
     // Move up
-    move_up(&new_state);  // Uses move_up from tile_game.c
+    move_up(&new_state);
     if (!is_visited(visited, serialize(new_state))) {
         add_to_visited(visited, serialize(new_state));
         enqueue(q, new_state);
@@ -147,7 +184,7 @@ void generate_possible_moves(struct game_state *state, struct queue *q, struct l
     new_state = *state;  // Reset to the original state
 
     // Move down
-    move_down(&new_state);  // Uses move_down from tile_game.c
+    move_down(&new_state);
     if (!is_visited(visited, serialize(new_state))) {
         add_to_visited(visited, serialize(new_state));
         enqueue(q, new_state);
@@ -156,7 +193,7 @@ void generate_possible_moves(struct game_state *state, struct queue *q, struct l
     new_state = *state;  // Reset to the original state
 
     // Move left
-    move_left(&new_state);  // Uses move_left from tile_game.c
+    move_left(&new_state);
     if (!is_visited(visited, serialize(new_state))) {
         add_to_visited(visited, serialize(new_state));
         enqueue(q, new_state);
@@ -165,12 +202,13 @@ void generate_possible_moves(struct game_state *state, struct queue *q, struct l
     new_state = *state;  // Reset to the original state
 
     // Move right
-    move_right(&new_state);  // Uses move_right from tile_game.c
+    move_right(&new_state);
     if (!is_visited(visited, serialize(new_state))) {
         add_to_visited(visited, serialize(new_state));
         enqueue(q, new_state);
     }
 }
+
 // Number of moves function (without is_solved, num_possible_moves, and make_move)
 int number_of_moves(struct game_state start) {
     // Initialize the queue
