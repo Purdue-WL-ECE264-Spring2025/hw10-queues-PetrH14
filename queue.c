@@ -103,13 +103,38 @@ void free_queue(struct queue *q) {
 // Generate possible next moves and enqueue them
 void generate_possible_moves(struct game_state *state, struct queue *q, struct linked_list *visited) {
     struct game_state new_state;
-    
+    int empty_tile_row = -1;
+    int empty_tile_col = -1;
+
+    // Find the position of the empty tile (0)
+    for (int i = 0; i < 4; i++) {
+        for (int j = 0; j < 4; j++) {
+            if (state->tiles[i][j] == 0) {
+                empty_tile_row = i;
+                empty_tile_col = j;
+                break;
+            }
+        }
+    }
+
     void (*moves[])(struct game_state*) = {move_up, move_down, move_left, move_right};
 
+    // Check for valid moves based on the position of the empty tile
     for (int i = 0; i < 4; i++) {
         new_state = *state;  // Copy the current state
-        moves[i](&new_state);
+        
+        // Boundary checks for each direction:
+        if (i == 0 && empty_tile_row > 0) {  // Move up
+            moves[i](&new_state);  // Apply the move
+        } else if (i == 1 && empty_tile_row < 3) {  // Move down
+            moves[i](&new_state);  // Apply the move
+        } else if (i == 2 && empty_tile_col > 0) {  // Move left
+            moves[i](&new_state);  // Apply the move
+        } else if (i == 3 && empty_tile_col < 3) {  // Move right
+            moves[i](&new_state);  // Apply the move
+        }
 
+        // After applying the move, check if the new state has already been visited
         if (!is_visited(visited, serialize(new_state))) {
             add_to_visited(visited, serialize(new_state));
             enqueue(q, new_state);
