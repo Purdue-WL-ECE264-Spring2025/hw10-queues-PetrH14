@@ -2,7 +2,7 @@
 
 #include <stdlib.h>
 
-
+// Utility function to create a new node
 struct list_node* new_node(size_t value) {
     struct list_node* node = (struct list_node*)malloc(sizeof(struct list_node));
     if (node == NULL) {
@@ -18,7 +18,6 @@ struct list_node* new_node(size_t value) {
 void insert_at_head(struct linked_list* list, size_t value) {
     struct list_node* new_node = new_node(value);
     if (new_node == NULL) {
-        // Return if memory allocation failed
         return;
     }
     new_node->next = list->head;
@@ -29,7 +28,6 @@ void insert_at_head(struct linked_list* list, size_t value) {
 void insert_at_tail(struct linked_list* list, size_t value) {
     struct list_node* new_node = new_node(value);
     if (new_node == NULL) {
-        // Return if memory allocation failed
         return;
     }
 
@@ -47,31 +45,31 @@ void insert_at_tail(struct linked_list* list, size_t value) {
 }
 
 // Remove a node from the head of the list
-size_t remove_from_head(struct linked_list* list) {
+bool remove_from_head(struct linked_list* list, size_t* value) {
     if (list->head == NULL) {
-        // List is empty, return an error code (e.g., SIZE_MAX)
-        return (size_t)-1;  // Return an error code or sentinel value
+        // List is empty, return false
+        return false;
     }
     struct list_node* temp = list->head;
-    size_t value = temp->value;
+    *value = temp->value;
     list->head = list->head->next;
     free(temp);
-    return value;
+    return true;
 }
 
 // Remove a node from the tail of the list
-size_t remove_from_tail(struct linked_list* list) {
+bool remove_from_tail(struct linked_list* list, size_t* value) {
     if (list->head == NULL) {
-        // List is empty, return an error code (e.g., SIZE_MAX)
-        return (size_t)-1;  // Return an error code or sentinel value
+        // List is empty, return false
+        return false;
     }
 
     // If there's only one node in the list
     if (list->head->next == NULL) {
-        size_t value = list->head->value;
+        *value = list->head->value;
         free(list->head);
         list->head = NULL;
-        return value;
+        return true;
     }
 
     // Otherwise, traverse to the second-to-last node
@@ -80,10 +78,10 @@ size_t remove_from_tail(struct linked_list* list) {
         current = current->next;
     }
 
-    size_t value = current->next->value;
+    *value = current->next->value;
     free(current->next);
     current->next = NULL;
-    return value;
+    return true;
 }
 
 // Free the entire list
@@ -96,11 +94,12 @@ void free_list(struct linked_list* list) {
     }
     list->head = NULL;
 }
-// Utility function to help you debugging, do not modify
-void dump_list(FILE *fp, struct linked_list list) {
-  fprintf(fp, "[ ");
-  for (struct list_node *cur = list.head; cur != NULL; cur = cur->next) {
-    fprintf(fp, "%zu ", cur->value);
-  }
-  fprintf(fp, "]\n");
+
+// Utility function to dump the list for debugging purposes
+void dump_list(FILE *fp, const struct linked_list* list) {
+    fprintf(fp, "[ ");
+    for (struct list_node *cur = list->head; cur != NULL; cur = cur->next) {
+        fprintf(fp, "%zu ", cur->value);
+    }
+    fprintf(fp, "]\n");
 }
