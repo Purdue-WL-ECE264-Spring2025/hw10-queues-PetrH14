@@ -8,8 +8,8 @@ extern void move_down(struct game_state *state);
 extern void move_left(struct game_state *state);
 extern void move_right(struct game_state *state);
 
-// Helper function to free a list of nodes
-void free_list(struct list_node *head) {
+// Helper function to free a list of nodes (renamed to avoid conflict)
+void free_node_list(struct list_node *head) {
     while (head != NULL) {
         struct list_node *to_free = head;
         head = head->next;
@@ -91,13 +91,13 @@ void add_to_visited(struct linked_list *visited, uint64_t state) {
 
 // Free the visited list and its nodes
 void free_visited(struct linked_list *visited) {
-    free_list(visited->head);
+    free_node_list(visited->head);
     visited->head = NULL;
 }
 
 // Free the queue and its nodes
 void free_queue(struct queue *q) {
-    free_list(q->data.head);
+    free_node_list(q->data.head);
     q->data.head = NULL;
 }
 
