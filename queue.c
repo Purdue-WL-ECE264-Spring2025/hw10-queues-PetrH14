@@ -104,15 +104,14 @@ void free_queue(struct queue *q) {
 // Generate possible next moves and enqueue them
 void generate_possible_moves(struct game_state *state, struct queue *q, struct linked_list *visited) {
     struct game_state new_state;
-
-    // Array of movement functions
+    
     void (*moves[])(struct game_state*) = {move_up, move_down, move_left, move_right};
 
     for (int i = 0; i < 4; i++) {
         new_state = *state;  // Copy the current state
-        moves[i](&new_state); // Apply the move (move_up, move_down, move_left, move_right)
+        moves[i](&new_state);
 
-        // If the new state has not been visited, enqueue it
+        // Ensure the new state is not visited and is within boundaries
         if (!is_visited(visited, serialize(new_state))) {
             add_to_visited(visited, serialize(new_state));
             enqueue(q, new_state);
@@ -141,10 +140,22 @@ int number_of_moves(struct game_state start) {
 
         num_moves++;
         generate_possible_moves(&current_state, &q, &visited);
+
+        // Debugging: Print current state and the number of visited states
+        printf("State %d: ", num_moves);
+        for (int i = 0; i < 4; i++) {
+            for (int j = 0; j < 4; j++) {
+                printf("%d ", current_state.tiles[i][j]);
+            }
+        }
+        printf("\n");
+
+        // Debugging: Print the number of visited states
+        printf("Visited states: %d\n", visited.size);
     }
 
     free_queue(&q);
     free_visited(&visited);
 
-    return num_moves;
+    return -1;  // If no solution found, return -1
 }
