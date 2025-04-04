@@ -84,8 +84,8 @@ size_t remove_from_tail(struct linked_list *list) {
 }
 
 // Free the entire list
-int is_visited(struct list_node *node, struct list_node *visited) {
-    struct list_node *current = visited;
+int is_visited(struct linked_list* visited, struct list_node* node) {
+    struct list_node* current = visited->head;
     while (current != NULL) {
         if (current == node) {
             return 1;  // Node is already visited
@@ -97,19 +97,19 @@ int is_visited(struct list_node *node, struct list_node *visited) {
 
 // Dump the list while avoiding cycles (infinite loops)
 void dump_list(FILE *fp, struct linked_list list) {
-    struct list_node *visited = NULL;  // List to track visited nodes
-    struct list_node *current = list.head;
+    struct linked_list visited = {NULL};  // Linked list to track visited nodes
+    struct list_node* current = list.head;
     
     fprintf(fp, "[ ");
     while (current != NULL) {
-        if (is_visited(current, visited)) {
+        if (is_visited(&visited, current)) {
             fprintf(fp, "Cycle detected! ");
             break;
         }
         fprintf(fp, "%zu ", current->value);
         
         // Mark the current node as visited by adding it to the visited list
-        insert_at_tail(&visited, current);
+        insert_at_tail(&visited, (size_t)current);  // Store the pointer value
         
         current = current->next;
     }
@@ -121,18 +121,18 @@ void dump_list(FILE *fp, struct linked_list list) {
 
 // Free the entire list while avoiding cycles
 void free_list(struct linked_list list) {
-    struct list_node *visited = NULL;  // List to track visited nodes
-    struct list_node *current = list.head;
+    struct linked_list visited = {NULL};  // Linked list to track visited nodes
+    struct list_node* current = list.head;
     
     while (current != NULL) {
-        if (is_visited(current, visited)) {
+        if (is_visited(&visited, current)) {
             break;  // Cycle detected, break out
         }
         
         // Mark the current node as visited by adding it to the visited list
-        insert_at_tail(&visited, current);
+        insert_at_tail(&visited, (size_t)current);  // Store the pointer value
         
-        struct list_node *temp = current;
+        struct list_node* temp = current;
         current = current->next;
         free(temp);  // Free the current node
     }
