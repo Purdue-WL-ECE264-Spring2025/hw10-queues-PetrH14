@@ -125,7 +125,7 @@ void find_blank(struct game_state *state, int *row, int *col) {
 }
 
 // Move up: Only if the empty space is not in the first row
-void move_up(struct game_state *state) {
+void check_up(struct game_state *state) {
     int row, col;
     find_blank(state, &row, &col);
     if (row > 0) {  // Ensure we're not in the first row
@@ -136,7 +136,7 @@ void move_up(struct game_state *state) {
 }
 
 // Move down: Only if the empty space is not in the last row
-void move_down(struct game_state *state) {
+void check_down(struct game_state *state) {
     int row, col;
     find_blank(state, &row, &col);
     if (row < 3) {  // Ensure we're not in the last row
@@ -147,7 +147,7 @@ void move_down(struct game_state *state) {
 }
 
 // Move left: Only if the empty space is not in the first column
-void move_left(struct game_state *state) {
+void check_left(struct game_state *state) {
     int row, col;
     find_blank(state, &row, &col);
     if (col > 0) {  // Ensure we're not in the first column
@@ -158,7 +158,7 @@ void move_left(struct game_state *state) {
 }
 
 // Move right: Only if the empty space is not in the last column
-void move_right(struct game_state *state) {
+void check_right(struct game_state *state) {
     int row, col;
     find_blank(state, &row, &col);
     if (col < 3) {  // Ensure we're not in the last column
@@ -175,7 +175,7 @@ void generate_possible_moves(struct game_state *state, struct queue *q, struct l
     // Try all four possible moves (up, down, left, right)
     
     // Move up
-    move_up(&new_state);
+    check_up(&new_state);
     if (!is_visited(visited, serialize(new_state))) {
         add_to_visited(visited, serialize(new_state));
         enqueue(q, new_state);
@@ -184,7 +184,7 @@ void generate_possible_moves(struct game_state *state, struct queue *q, struct l
     new_state = *state;  // Reset to the original state
 
     // Move down
-    move_down(&new_state);
+    check_down(&new_state);
     if (!is_visited(visited, serialize(new_state))) {
         add_to_visited(visited, serialize(new_state));
         enqueue(q, new_state);
@@ -193,7 +193,7 @@ void generate_possible_moves(struct game_state *state, struct queue *q, struct l
     new_state = *state;  // Reset to the original state
 
     // Move left
-    move_left(&new_state);
+    check_left(&new_state);
     if (!is_visited(visited, serialize(new_state))) {
         add_to_visited(visited, serialize(new_state));
         enqueue(q, new_state);
@@ -202,7 +202,7 @@ void generate_possible_moves(struct game_state *state, struct queue *q, struct l
     new_state = *state;  // Reset to the original state
 
     // Move right
-    move_right(&new_state);
+    check_right(&new_state);
     if (!is_visited(visited, serialize(new_state))) {
         add_to_visited(visited, serialize(new_state));
         enqueue(q, new_state);
