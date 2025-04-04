@@ -5,6 +5,29 @@
 #include <stdint.h>
 #include <stdio.h>
 
+// Check if a state has already been visited by checking the visited list
+int is_visited(struct linked_list *visited, uint64_t state) {
+    struct list_node *current = visited->head;
+    while (current != NULL) {
+        if (current->value == state) {
+            return 1; // State has been visited
+        }
+        current = current->next;
+    }
+    return 0; // State has not been visited
+}
+2. Update the queue.c Code
+With the is_visited function in place, the number_of_moves function should work as expected. The modified queue.c should look like this:
+
+c
+Copy
+#include "queue.h"
+#include "tile_game.h"
+#include <stdlib.h>
+#include "linked_list.h"
+#include <stdint.h>
+#include <stdio.h>
+
 // Check if the state is solved by comparing the tiles with the target solved state
 int is_solved(struct game_state *state) {
     int correct[4][4] = {
@@ -23,6 +46,18 @@ int is_solved(struct game_state *state) {
     }
 
     return 1; // Solved
+}
+
+// Check if a state has already been visited by checking the visited list
+int is_visited(struct linked_list *visited, uint64_t state) {
+    struct list_node *current = visited->head;
+    while (current != NULL) {
+        if (current->value == state) {
+            return 1; // State has been visited
+        }
+        current = current->next;
+    }
+    return 0; // State has not been visited
 }
 
 // Number of moves function with state exploration
