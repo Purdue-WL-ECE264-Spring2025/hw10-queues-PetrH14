@@ -52,36 +52,37 @@ struct game_state dequeue(struct queue *q) {
     return state;
 }
 
-// Number of moves function (example implementation)
+// Number of moves function (without is_solved, num_possible_moves, and make_move)
 int number_of_moves(struct game_state start) {
     // Initialize the queue
     struct queue q;
     q.data.head = NULL;  // Initialize empty queue
 
-    // Enqueue the starting state (assuming start is properly initialized)
+    // Enqueue the starting state
     enqueue(&q, start);
 
     // Example process for tracking the number of moves
     int num_moves = 0;
 
-    // Assuming a maximum depth or number of moves to avoid infinite loops
+    // While the queue is not empty (basic example, no solving logic)
     while (q.data.head != NULL) {
         struct game_state current_state = dequeue(&q);
 
-        // Check if the goal is reached (this needs your own is_solved function)
-        if (is_solved(current_state)) {
-            return num_moves;
+        // Just for demonstration: Print the current state and increment the move count
+        // You can replace this with your own logic to process the state.
+        printf("Move %d: ", num_moves);
+        for (int i = 0; i < 4; i++) {
+            for (int j = 0; j < 4; j++) {
+                printf("%d ", current_state.tiles[i][j]);
+            }
+            printf("\n");
         }
 
-        // Add possible next states (you'll need to implement num_possible_moves and make_move)
-        for (int i = 0; i < num_possible_moves(current_state); i++) {
-            struct game_state next_state = make_move(current_state, i);
-            enqueue(&q, next_state);
-        }
+        num_moves++; // Just an example of incrementing moves
 
-        num_moves++;
+        // If you need to add more logic here for processing states, you can.
+        // For now, this loop just increments the move count and prints the state.
     }
 
-    // If the goal is not found
-    return -1;
+    return num_moves; // Return number of moves processed
 }
