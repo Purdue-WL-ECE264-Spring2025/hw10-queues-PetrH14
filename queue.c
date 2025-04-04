@@ -160,7 +160,6 @@ int number_of_moves(struct game_state start) {
     free_visited(&visited);
 
     if (move_limit_reached) {
-        printf("Max moves reached, solution not found.\n");
         return -1;  // Indicating failure to find a solution
     }
 
