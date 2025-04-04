@@ -36,7 +36,7 @@ int is_solved(struct game_state *state) {
     return 1; // Solved
 }
 
-// Enqueue a new state into the queue (without visited list)
+// Enqueue a new state into the queue
 void enqueue(struct queue *q, struct game_state state) {
     uint64_t serialized_state = serialize(state);
 
@@ -89,10 +89,11 @@ void add_to_visited(struct linked_list *visited, uint64_t state) {
     insert_at_tail(visited, state);  // Insert serialized state at the tail of the visited list
 }
 
-// Generate possible next moves and enqueue them (handle visited states before enqueueing)
+// Generate possible next moves and enqueue them
 void generate_possible_moves(struct game_state *state, struct queue *q, struct linked_list *visited) {
     struct game_state new_state;
     
+    // Array of move functions
     void (*moves[])(struct game_state*) = {move_up, move_down, move_left, move_right};
 
     for (int i = 0; i < 4; i++) {
@@ -100,9 +101,11 @@ void generate_possible_moves(struct game_state *state, struct queue *q, struct l
         moves[i](&new_state);
 
         uint64_t serialized_state = serialize(new_state);
+        
+        // Only enqueue new states that haven't been visited
         if (!is_visited(visited, serialized_state)) {
             add_to_visited(visited, serialized_state);
-            enqueue(q, new_state);  // Enqueue only if state has not been visited
+            enqueue(q, new_state);  // Enqueue the new state
         }
     }
 }
@@ -126,7 +129,7 @@ int number_of_moves(struct game_state start) {
             return num_moves;
         }
 
-        num_moves++;
+        num_moves++;  // Increment the move count for each state processed
         generate_possible_moves(&current_state, &q, &visited);
     }
 
