@@ -92,7 +92,7 @@ void add_to_visited(struct linked_list *visited, uint64_t state) {
 // Generate possible next moves and enqueue them
 void generate_possible_moves(struct game_state *state, struct queue *q, struct linked_list *visited) {
     struct game_state new_state;
-    
+
     // Array of move functions
     void (*moves[])(struct game_state*) = {move_up, move_down, move_left, move_right};
 
@@ -101,17 +101,23 @@ void generate_possible_moves(struct game_state *state, struct queue *q, struct l
         moves[i](&new_state);
 
         uint64_t serialized_state = serialize(new_state);
-        
+
         // Only enqueue new states that haven't been visited
         if (!is_visited(visited, serialized_state)) {
+            printf("Enqueuing new state:\n");
+            print_state(&new_state);  // Debug: Print state before enqueuing
             add_to_visited(visited, serialized_state);
             enqueue(q, new_state);  // Enqueue the new state
+        } else {
+            printf("State already visited:\n");
+            print_state(&new_state);  // Debug: Print state that is skipped
         }
     }
 }
 
 // Debugging helper function to print state details
 void print_state(struct game_state *state) {
+    printf("State: \n");
     for (int i = 0; i < 4; i++) {
         for (int j = 0; j < 4; j++) {
             printf("%d ", state->tiles[i][j]);
