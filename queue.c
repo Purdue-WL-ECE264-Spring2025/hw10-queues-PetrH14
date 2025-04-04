@@ -8,6 +8,9 @@ extern void move_down(struct game_state *state);
 extern void move_left(struct game_state *state);
 extern void move_right(struct game_state *state);
 
+// Function prototypes for helper functions
+void print_state(struct game_state *state);
+
 // Helper function to free a list of nodes
 void free_node_list(struct list_node *head) {
     while (head != NULL) {
