@@ -86,9 +86,8 @@ int is_visited(struct linked_list *visited, uint64_t state) {
 
 // Add a state to the visited list
 void add_to_visited(struct linked_list *visited, uint64_t state) {
-    insert_at_tail(visited, state);
+    insert_at_tail(visited, state);  // Insert serialized state at the tail of the visited list
 }
-
 // Free the visited list and its nodes
 void free_visited(struct linked_list *visited) {
     free_node_list(visited->head);
