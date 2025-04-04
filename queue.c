@@ -1,4 +1,3 @@
-
 #include "queue.h"
 #include "tile_game.h"    // Include tile_game.h for game-related functions
 #include <stdlib.h>        // For malloc and free
@@ -94,7 +93,9 @@ void add_to_visited(struct linked_list *visited, uint64_t state) {
 void generate_possible_moves(struct game_state *state, struct queue *q, struct linked_list *visited) {
     struct game_state new_state = *state;  // Create a copy of the current state
 
-    // Try all four possible moves
+    // Try all four possible moves (up, down, left, right)
+    
+    // Move up
     move_up(&new_state);
     if (!is_visited(visited, serialize(new_state))) {
         add_to_visited(visited, serialize(new_state));
@@ -102,6 +103,8 @@ void generate_possible_moves(struct game_state *state, struct queue *q, struct l
     }
 
     new_state = *state;  // Reset to the original state
+
+    // Move down
     move_down(&new_state);
     if (!is_visited(visited, serialize(new_state))) {
         add_to_visited(visited, serialize(new_state));
@@ -109,6 +112,8 @@ void generate_possible_moves(struct game_state *state, struct queue *q, struct l
     }
 
     new_state = *state;  // Reset to the original state
+
+    // Move left
     move_left(&new_state);
     if (!is_visited(visited, serialize(new_state))) {
         add_to_visited(visited, serialize(new_state));
@@ -116,6 +121,8 @@ void generate_possible_moves(struct game_state *state, struct queue *q, struct l
     }
 
     new_state = *state;  // Reset to the original state
+
+    // Move right
     move_right(&new_state);
     if (!is_visited(visited, serialize(new_state))) {
         add_to_visited(visited, serialize(new_state));
