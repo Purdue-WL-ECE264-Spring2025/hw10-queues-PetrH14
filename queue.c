@@ -125,6 +125,11 @@ int number_of_moves(struct game_state start) {
     struct queue q = {0};
     struct linked_list visited = {0};
 
+    // Check if the start state is already solved
+    if (is_solved(&start)) {
+        return 0;  // No moves required
+    }
+
     enqueue(&q, start);
     add_to_visited(&visited, serialize(start));
 
