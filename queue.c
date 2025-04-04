@@ -38,16 +38,7 @@ int is_solved(struct game_state *state) {
 }
 
 // Check if a state has already been visited by checking the visited list
-int is_visited(struct linked_list *visited, uint64_t state) {
-    struct list_node *current = visited->head;
-    while (current != NULL) {
-        if (current->value == state) {
-            return 1; // State has been visited
-        }
-        current = current->next;
-    }
-    return 0; // State has not been visited
-}
+
 
 // Number of moves function with state exploration
 int number_of_moves(struct game_state start) {
