@@ -1,6 +1,6 @@
 #include "linked_list.h"
-
 #include <stdlib.h>
+#include <stdio.h>
 
 // Utility function to create a new node
 struct list_node* new_node(size_t value) {
@@ -85,19 +85,32 @@ size_t remove_from_tail(struct linked_list* list) {
 }
 
 // Free the entire list
-void free_list(struct linked_list list) {
-    struct list_node* current = list.head;
+void free_list(struct linked_list* list) {
+    struct list_node* current = list->head;
     while (current != NULL) {
         struct list_node* temp = current;
         current = current->next;
         free(temp);
     }
+    list->head = NULL;  // Set the head to NULL after freeing all nodes
+}
+
+// Check if a value exists in the list (i.e., if the state was visited)
+int is_visited(struct linked_list* list, size_t value) {
+    struct list_node* current = list->head;
+    while (current != NULL) {
+        if (current->value == value) {
+            return 1;  // State already visited
+        }
+        current = current->next;
+    }
+    return 0;  // State not visited
 }
 
 // Utility function to dump the list for debugging purposes
-void dump_list(FILE *fp, struct linked_list list) {
+void dump_list(FILE *fp, struct linked_list* list) {
     fprintf(fp, "[ ");
-    for (struct list_node *cur = list.head; cur != NULL; cur = cur->next) {
+    for (struct list_node *cur = list->head; cur != NULL; cur = cur->next) {
         fprintf(fp, "%zu ", cur->value);
     }
     fprintf(fp, "]\n");
