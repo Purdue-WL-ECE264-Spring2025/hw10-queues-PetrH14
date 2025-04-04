@@ -8,6 +8,10 @@ extern void move_down(struct game_state *state);
 extern void move_left(struct game_state *state);
 extern void move_right(struct game_state *state);
 
+// Forward declarations
+int is_visited(struct linked_list *visited, uint64_t state);
+void add_to_visited(struct linked_list *visited, uint64_t state);
+
 // Helper function to free a list of nodes
 void free_node_list(struct list_node *head) {
     while (head != NULL) {
@@ -37,11 +41,11 @@ int is_solved(struct game_state *state) {
 }
 
 // Enqueue a new state into the queue
-void enqueue(struct queue *q, struct game_state state) {
+void enqueue(struct queue *q, struct game_state state, struct linked_list *visited) {
     uint64_t serialized_state = serialize(state);
 
     // Check if state is already visited before enqueuing
-    if (is_visited(&q->visited, serialized_state)) {
+    if (is_visited(visited, serialized_state)) {
         return; // Don't enqueue if state has already been visited
     }
 
@@ -61,16 +65,7 @@ void enqueue(struct queue *q, struct game_state state) {
     }
 
     // Add to visited states
-    add_to_visited(&q->visited, serialized_state);
-
-    // Debugging: Print the state being enqueued
-    printf("Enqueued State: \n");
-    for (int i = 0; i < 4; i++) {
-        for (int j = 0; j < 4; j++) {
-            printf("%d ", state.tiles[i][j]);
-        }
-        printf("\n");
-    }
+    add_to_visited(visited, serialized_state);
 }
 
 // Dequeue a state from the queue
@@ -119,7 +114,7 @@ void free_queue(struct queue *q) {
 }
 
 // Generate possible next moves and enqueue them
-void generate_possible_moves(struct game_state *state, struct queue *q) {
+void generate_possible_moves(struct game_state *state, struct queue *q, struct linked_list *visited) {
     struct game_state new_state;
     
     void (*moves[])(struct game_state*) = {move_up, move_down, move_left, move_right};
@@ -128,8 +123,8 @@ void generate_possible_moves(struct game_state *state, struct queue *q) {
         new_state = *state;  // Copy the current state
         moves[i](&new_state);
 
-        if (!is_visited(&q->visited, serialize(new_state))) {
-            enqueue(q, new_state); // Enqueue new state if not visited
+        if (!is_visited(visited, serialize(new_state))) {
+            enqueue(q, new_state, visited); // Enqueue new state if not visited
         }
     }
 }
@@ -139,7 +134,7 @@ int number_of_moves(struct game_state start) {
     struct queue q = {0};
     struct linked_list visited = {0};
 
-    enqueue(&q, start);
+    enqueue(&q, start, &visited);
 
     int num_moves = 0;
 
@@ -153,16 +148,7 @@ int number_of_moves(struct game_state start) {
         }
 
         num_moves++;
-        generate_possible_moves(&current_state, &q);
-
-        // Debugging: Print queue size
-        int queue_size = 0;
-        struct list_node *node = q.data.head;
-        while (node != NULL) {
-            queue_size++;
-            node = node->next;
-        }
-        printf("Queue size: %d\n", queue_size);
+        generate_possible_moves(&current_state, &q, &visited);
     }
 
     free_queue(&q);
