@@ -1,50 +1,20 @@
 #include "queue.h"
-#include "tile_game.h"
-#include <stdlib.h>
-#include "linked_list.h"
-#include <stdint.h>
-#include <stdio.h>
+#include "tile_game.h"    // Include tile_game.h for game-related functions
+#include <stdlib.h>        // For malloc and free
+#include "linked_list.h"   // For struct list_node and linked list functions
+#include <stdint.h>        // For uint64_t type
+#include <stdio.h>         // For printf (for debugging)
 
-// Check if the state is solved by comparing the tiles with the target solved state
-int is_solved(struct game_state *state) {
-    int correct[4][4] = {
-        { 1,  2,  3,  4},
-        { 5,  6,  7,  8},
-        { 9, 10, 11, 12},
-        {13, 14, 15,  0} // 0 is the empty space
-    };
-
-    for (int row = 0; row < 4; row++) {
-        for (int col = 0; col < 4; col++) {
-            if (state->tiles[row][col] != correct[row][col]) {
-                return 0; // Not solved
-            }
-        }
-    }
-
-    return 1; // Solved
-}
-
-// Check if a state has already been visited by checking the visited list
+// Check if the state already exists in the visited list
 int is_visited(struct linked_list *visited, uint64_t state) {
     struct list_node *current = visited->head;
     while (current != NULL) {
         if (current->value == state) {
-            return 1; // State has been visited
+            return 1;  // State is already visited
         }
         current = current->next;
     }
-    return 0; // State has not been visited
-}
-
-void enqueue(struct queue *q, struct game_state state) {
-    insert_at_tail(&q->data, serialize(state));
-}
-
-// Dequeue a state from the queue
-struct game_state dequeue(struct queue *q) {
-    size_t serialized_state = remove_from_head(&q->data);
-    return deserialize(serialized_state);
+    return 0;  // State is not visited
 }
 
 // Number of moves function with state exploration
@@ -57,6 +27,7 @@ int number_of_moves(struct game_state start) {
     enqueue(&q, start);
 
     // Create a set to keep track of visited states (serialized states)
+    // This will prevent revisiting the same state and causing an infinite loop
     struct linked_list visited;
     visited.head = NULL;
 
@@ -135,6 +106,7 @@ int number_of_moves(struct game_state start) {
                 insert_at_tail(&visited, serialized_state);  // Add to visited list
             }
         }
+
         // Move right
         if (empty_col < 3) {
             next_state = current_state;
@@ -151,4 +123,4 @@ int number_of_moves(struct game_state start) {
     }
 
     return num_moves; // Return the number of moves processed
-}
+} 
