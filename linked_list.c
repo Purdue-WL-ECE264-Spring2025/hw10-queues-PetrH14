@@ -84,16 +84,7 @@ size_t remove_from_tail(struct linked_list *list) {
 }
 
 // Free the entire list
-int is_visited(struct linked_list* visited, struct list_node* node) {
-    struct list_node* current = visited->head;
-    while (current != NULL) {
-        if (current == node) {
-            return 1;  // Node is already visited
-        }
-        current = current->next;
-    }
-    return 0;  // Node is not visited
-}
+
 
 // Dump the list while avoiding cycles (infinite loops)
 void dump_list(FILE *fp, struct linked_list list) {
