@@ -84,21 +84,59 @@ size_t remove_from_tail(struct linked_list *list) {
 }
 
 // Free the entire list
-void free_list(struct linked_list list) {
-    struct list_node* current = list.head;
+int is_visited(struct list_node *node, struct list_node *visited) {
+    struct list_node *current = visited;
     while (current != NULL) {
-        struct list_node* temp = current;
+        if (current == node) {
+            return 1;  // Node is already visited
+        }
         current = current->next;
-        free(temp);
     }
-    list.head = NULL;  // Set head to NULL to indicate an empty list
+    return 0;  // Node is not visited
 }
 
-// Utility function to dump the list for debugging purposes
+// Dump the list while avoiding cycles (infinite loops)
 void dump_list(FILE *fp, struct linked_list list) {
+    struct list_node *visited = NULL;  // List to track visited nodes
+    struct list_node *current = list.head;
+    
     fprintf(fp, "[ ");
-    for (struct list_node *cur = list.head; cur != NULL; cur = cur->next) {
-        fprintf(fp, "%zu ", cur->value);
+    while (current != NULL) {
+        if (is_visited(current, visited)) {
+            fprintf(fp, "Cycle detected! ");
+            break;
+        }
+        fprintf(fp, "%zu ", current->value);
+        
+        // Mark the current node as visited by adding it to the visited list
+        insert_at_tail(&visited, current);
+        
+        current = current->next;
     }
     fprintf(fp, "]\n");
+    
+    // Free the visited list to avoid memory leak
+    free_list(visited);
+}
+
+// Free the entire list while avoiding cycles
+void free_list(struct linked_list list) {
+    struct list_node *visited = NULL;  // List to track visited nodes
+    struct list_node *current = list.head;
+    
+    while (current != NULL) {
+        if (is_visited(current, visited)) {
+            break;  // Cycle detected, break out
+        }
+        
+        // Mark the current node as visited by adding it to the visited list
+        insert_at_tail(&visited, current);
+        
+        struct list_node *temp = current;
+        current = current->next;
+        free(temp);  // Free the current node
+    }
+    
+    // Free the visited list to avoid memory leak
+    free_list(visited);
 }
