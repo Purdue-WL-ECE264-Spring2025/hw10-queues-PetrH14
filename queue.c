@@ -1,13 +1,19 @@
 #include "queue.h"
 #include "tile_game.h"  // Including tile_game.h for game-related functions
+#include <stdlib.h>      // Needed for malloc() and free()
 
 // Enqueue a new state into the queue
 void enqueue(struct queue *q, struct game_state state) {
     // Serialize the game state to store it in the linked list
     uint64_t serialized_state = serialize(state);
-    
+
     // Create a new node for the linked list
     struct linked_list_node *new_node = (struct linked_list_node *)malloc(sizeof(struct linked_list_node));
+    if (new_node == NULL) {
+        // Handle memory allocation failure (optional)
+        return;
+    }
+    
     new_node->data = serialized_state;  // Store the serialized state
     new_node->next = NULL;
 
