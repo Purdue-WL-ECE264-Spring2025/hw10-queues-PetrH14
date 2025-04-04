@@ -88,6 +88,7 @@ int is_visited(struct linked_list *visited, uint64_t state) {
 void add_to_visited(struct linked_list *visited, uint64_t state) {
     insert_at_tail(visited, state);  // Insert serialized state at the tail of the visited list
 }
+
 // Free the visited list and its nodes
 void free_visited(struct linked_list *visited) {
     free_node_list(visited->head);
@@ -103,45 +104,22 @@ void free_queue(struct queue *q) {
 // Generate possible next moves and enqueue them
 void generate_possible_moves(struct game_state *state, struct queue *q, struct linked_list *visited) {
     struct game_state new_state;
-    int empty_tile_row = -1;
-    int empty_tile_col = -1;
-
-    // Find the position of the empty tile (0)
-    for (int i = 0; i < 4; i++) {
-        for (int j = 0; j < 4; j++) {
-            if (state->tiles[i][j] == 0) {
-                empty_tile_row = i;
-                empty_tile_col = j;
-                break;
-            }
-        }
-    }
-
+    
     void (*moves[])(struct game_state*) = {move_up, move_down, move_left, move_right};
 
-    // Check for valid moves based on the position of the empty tile
     for (int i = 0; i < 4; i++) {
         new_state = *state;  // Copy the current state
-        
-        // Boundary checks for each direction:
-        if (i == 0 && empty_tile_row > 0) {  // Move up
-            moves[i](&new_state);  // Apply the move
-        } else if (i == 1 && empty_tile_row < 3) {  // Move down
-            moves[i](&new_state);  // Apply the move
-        } else if (i == 2 && empty_tile_col > 0) {  // Move left
-            moves[i](&new_state);  // Apply the move
-        } else if (i == 3 && empty_tile_col < 3) {  // Move right
-            moves[i](&new_state);  // Apply the move
-        }
+        moves[i](&new_state);
 
         uint64_t serialized_state = serialize(new_state);
-        // After applying the move, check if the new state has already been visited
+
         if (!is_visited(visited, serialized_state)) {
             add_to_visited(visited, serialized_state);
             enqueue(q, new_state);
         }
     }
 }
+
 // Number of moves function (without is_solved, num_possible_moves, and make_move)
 int number_of_moves(struct game_state start) {
     struct queue q = {0};
@@ -151,8 +129,10 @@ int number_of_moves(struct game_state start) {
     add_to_visited(&visited, serialize(start));
 
     int num_moves = 0;
+    int max_moves = 1000;  // Set a maximum number of moves to avoid infinite loop
+    int move_limit_reached = 0;
 
-    while (q.data.head != NULL) {
+    while (q.data.head != NULL && !move_limit_reached) {
         struct game_state current_state = dequeue(&q);
 
         if (is_solved(&current_state)) {
@@ -162,11 +142,22 @@ int number_of_moves(struct game_state start) {
         }
 
         num_moves++;
+        
+        if (num_moves >= max_moves) {
+            move_limit_reached = 1; // Stop if we've exceeded the max move limit
+            break;
+        }
+
         generate_possible_moves(&current_state, &q, &visited);
     }
 
     free_queue(&q);
     free_visited(&visited);
+
+    if (move_limit_reached) {
+        printf("Max moves reached, solution not found.\n");
+        return -1;  // Indicating failure to find a solution
+    }
 
     return num_moves;
 }
