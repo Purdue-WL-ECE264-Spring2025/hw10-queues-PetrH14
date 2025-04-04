@@ -3,6 +3,20 @@
 #include <stdlib.h>        // For malloc and free
 #include "linked_list.h"   // For struct list_node and linked list functions
 
+extern void move_up(struct game_state *state);
+extern void move_down(struct game_state *state);
+extern void move_left(struct game_state *state);
+extern void move_right(struct game_state *state);
+
+// Helper function to free a list of nodes
+void free_list(struct list_node *head) {
+    while (head != NULL) {
+        struct list_node *to_free = head;
+        head = head->next;
+        free(to_free);
+    }
+}
+
 // Check if the current state is solved (goal state)
 int is_solved(struct game_state *state) {
     uint8_t goal_state[4][4] = {
@@ -12,7 +26,6 @@ int is_solved(struct game_state *state) {
         {13, 14, 15, 0}
     };
 
-    // Compare the current state with the goal state
     for (int i = 0; i < 4; i++) {
         for (int j = 0; j < 4; j++) {
             if (state->tiles[i][j] != goal_state[i][j]) {
@@ -25,24 +38,16 @@ int is_solved(struct game_state *state) {
 
 // Enqueue a new state into the queue
 void enqueue(struct queue *q, struct game_state state) {
-    // Serialize the game state to store it in the linked list
     uint64_t serialized_state = serialize(state);
 
-    // Create a new node for the linked list (using struct list_node)
     struct list_node *new_node = (struct list_node *)malloc(sizeof(struct list_node));
-    if (new_node == NULL) {
-        // Handle memory allocation failure (optional)
-        return;
-    }
-    
-    new_node->value = serialized_state;  // Store the serialized state
+    if (new_node == NULL) return;  // Handle memory allocation failure
+    new_node->value = serialized_state;
     new_node->next = NULL;
 
-    // If the queue is empty, the new node will be the first element
     if (q->data.head == NULL) {
         q->data.head = new_node;
     } else {
-        // Otherwise, append to the end of the list
         struct list_node *temp = q->data.head;
         while (temp->next != NULL) {
             temp = temp->next;
@@ -53,209 +58,91 @@ void enqueue(struct queue *q, struct game_state state) {
 
 // Dequeue a state from the queue
 struct game_state dequeue(struct queue *q) {
-    // Check if the queue is empty
     if (q->data.head == NULL) {
         struct game_state invalid_state = {0}; // Return an invalid state if the queue is empty
         return invalid_state;
     }
 
-    // Remove the first node from the linked list
     struct list_node *node_to_remove = q->data.head;
     q->data.head = node_to_remove->next;
 
-    // Deserialize the serialized state from the node
     struct game_state state = deserialize(node_to_remove->value);
-    
-    // Free the removed node
     free(node_to_remove);
 
     return state;
 }
 
-// Check if a state has been visited (helps avoid revisiting states)
+// Check if a state has been visited
 int is_visited(struct linked_list *visited, uint64_t state) {
     struct list_node *current = visited->head;
     while (current != NULL) {
         if (current->value == state) {
-            return 1; // State already visited
+            return 1;
         }
         current = current->next;
     }
-    return 0; // State not visited
+    return 0;
 }
 
 // Add a state to the visited list
 void add_to_visited(struct linked_list *visited, uint64_t state) {
-    insert_at_tail(visited, state);  // Insert serialized state at the tail of the visited list
+    insert_at_tail(visited, state);
 }
 
 // Free the visited list and its nodes
 void free_visited(struct linked_list *visited) {
-    struct list_node *current = visited->head;
-    while (current != NULL) {
-        struct list_node *to_free = current;
-        current = current->next;
-        free(to_free);  // Free each node
-    }
-    visited->head = NULL;  // Set head to NULL after freeing all nodes
+    free_list(visited->head);
+    visited->head = NULL;
 }
 
 // Free the queue and its nodes
 void free_queue(struct queue *q) {
-    struct list_node *current = q->data.head;
-    while (current != NULL) {
-        struct list_node *to_free = current;
-        current = current->next;
-        free(to_free);  // Free each node
-    }
-    q->data.head = NULL;  // Set head to NULL after freeing all nodes
-}
-
-// Helper function to find the position of the empty space (blank)
-void find_blank(struct game_state *state, int *row, int *col) {
-    for (int i = 0; i < 4; i++) {
-        for (int j = 0; j < 4; j++) {
-            if (state->tiles[i][j] == 0) {
-                *row = i;
-                *col = j;
-                return;
-            }
-        }
-    }
-}
-
-// Move up: Only if the empty space is not in the first row
-void check_up(struct game_state *state) {
-    int row, col;
-    find_blank(state, &row, &col);
-    if (row > 0) {  // Ensure we're not in the first row
-        // Swap the blank space with the tile above
-        state->tiles[row][col] = state->tiles[row-1][col];
-        state->tiles[row-1][col] = 0;
-    }
-}
-
-// Move down: Only if the empty space is not in the last row
-void check_down(struct game_state *state) {
-    int row, col;
-    find_blank(state, &row, &col);
-    if (row < 3) {  // Ensure we're not in the last row
-        // Swap the blank space with the tile below
-        state->tiles[row][col] = state->tiles[row+1][col];
-        state->tiles[row+1][col] = 0;
-    }
-}
-
-// Move left: Only if the empty space is not in the first column
-void check_left(struct game_state *state) {
-    int row, col;
-    find_blank(state, &row, &col);
-    if (col > 0) {  // Ensure we're not in the first column
-        // Swap the blank space with the tile on the left
-        state->tiles[row][col] = state->tiles[row][col-1];
-        state->tiles[row][col-1] = 0;
-    }
-}
-
-// Move right: Only if the empty space is not in the last column
-void check_right(struct game_state *state) {
-    int row, col;
-    find_blank(state, &row, &col);
-    if (col < 3) {  // Ensure we're not in the last column
-        // Swap the blank space with the tile on the right
-        state->tiles[row][col] = state->tiles[row][col+1];
-        state->tiles[row][col+1] = 0;
-    }
+    free_list(q->data.head);
+    q->data.head = NULL;
 }
 
 // Generate possible next moves and enqueue them
 void generate_possible_moves(struct game_state *state, struct queue *q, struct linked_list *visited) {
-    struct game_state new_state = *state;  // Create a copy of the current state
-
-    // Try all four possible moves (up, down, left, right)
+    struct game_state new_state;
     
-    // Move up
-    check_up(&new_state);
-    if (!is_visited(visited, serialize(new_state))) {
-        add_to_visited(visited, serialize(new_state));
-        enqueue(q, new_state);
-    }
+    void (*moves[])(struct game_state*) = {move_up, move_down, move_left, move_right};
 
-    new_state = *state;  // Reset to the original state
+    for (int i = 0; i < 4; i++) {
+        new_state = *state;  // Copy the current state
+        moves[i](&new_state);
 
-    // Move down
-    check_down(&new_state);
-    if (!is_visited(visited, serialize(new_state))) {
-        add_to_visited(visited, serialize(new_state));
-        enqueue(q, new_state);
-    }
-
-    new_state = *state;  // Reset to the original state
-
-    // Move left
-    check_left(&new_state);
-    if (!is_visited(visited, serialize(new_state))) {
-        add_to_visited(visited, serialize(new_state));
-        enqueue(q, new_state);
-    }
-
-    new_state = *state;  // Reset to the original state
-
-    // Move right
-    check_right(&new_state);
-    if (!is_visited(visited, serialize(new_state))) {
-        add_to_visited(visited, serialize(new_state));
-        enqueue(q, new_state);
+        if (!is_visited(visited, serialize(new_state))) {
+            add_to_visited(visited, serialize(new_state));
+            enqueue(q, new_state);
+        }
     }
 }
 
 // Number of moves function (without is_solved, num_possible_moves, and make_move)
 int number_of_moves(struct game_state start) {
-    // Initialize the queue
-    struct queue q;
-    q.data.head = NULL;  // Initialize empty queue
+    struct queue q = {0};
+    struct linked_list visited = {0};
 
-    // Initialize the visited list
-    struct linked_list visited;
-    visited.head = NULL;
-
-    // Enqueue the starting state
     enqueue(&q, start);
-    add_to_visited(&visited, serialize(start));  // Add the start state to the visited list
+    add_to_visited(&visited, serialize(start));
 
-    // Example process for tracking the number of moves
     int num_moves = 0;
 
-    // While the queue is not empty
     while (q.data.head != NULL) {
         struct game_state current_state = dequeue(&q);
 
-        // If the current state is solved, stop processing
         if (is_solved(&current_state)) {
-            // Clean up memory before returning
             free_queue(&q);
             free_visited(&visited);
-            return num_moves; // Return the number of moves when solved
+            return num_moves;
         }
 
-        num_moves++; // Increment the move count
-
-        // Generate possible moves and enqueue them
+        num_moves++;
         generate_possible_moves(&current_state, &q, &visited);
-
-        // Print the state for debugging (optional)
-        printf("Move %d: ", num_moves);
-        for (int i = 0; i < 4; i++) {
-            for (int j = 0; j < 4; j++) {
-                printf("%d ", current_state.tiles[i][j]);
-            }
-            printf("\n");
-        }
     }
 
-    // Clean up memory before returning
     free_queue(&q);
     free_visited(&visited);
 
-    return num_moves; // Return the number of moves processed
+    return num_moves;
 }
