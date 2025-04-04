@@ -2,6 +2,8 @@
 #include "tile_game.h"    // Include tile_game.h for game-related functions
 #include <stdlib.h>        // For malloc and free
 #include "linked_list.h"   // For struct list_node and linked list functions
+#include <stdint.h>        // For uint64_t type
+#include <stdio.h> 
 
 // Check if the current state is solved (goal state)
 int is_solved(struct game_state *state) {
