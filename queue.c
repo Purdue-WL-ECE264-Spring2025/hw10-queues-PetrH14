@@ -1,59 +1,46 @@
 #include "queue.h"
-#include "tile_game.h"  // Including tilegame.h for game-related functions
-
-#define MAX_QUEUE_SIZE 1024
-
-// Queue structure, containing data and tracking front/rear positions
-static uint64_t data[MAX_QUEUE_SIZE];
-static size_t front = 0;  // To track the front of the queue
-static size_t rear = 0;   // To track the rear of the queue
-
-// Initialize the queue
-void init_queue(struct queue* q) {
-    q->front = 0;
-    q->rear = 0;
-}
-
-// Check if the queue is empty
-int is_empty(struct queue* q) {
-    return q->front == q->rear;
-}
-
-// Check if the queue is full
-int is_full(struct queue* q) {
-    return (q->rear + 1) % MAX_QUEUE_SIZE == q->front;
-}
+#include "tile_game.h"  // Including tile_game.h for game-related functions
 
 // Enqueue a new state into the queue
-void enqueue(struct queue* q, struct game_state state) {
-    if (is_full(q)) {
-        // If the queue is full, return or handle the error
-        return;
-    }
-
-    // Serialize the game state and store it in the queue
+void enqueue(struct queue *q, struct game_state state) {
+    // Serialize the game state to store it in the linked list
     uint64_t serialized_state = serialize(state);
-    data[q->rear] = serialized_state;  // Insert the serialized state at the rear of the queue
-    q->rear = (q->rear + 1) % MAX_QUEUE_SIZE;  // Wrap around if necessary
+    
+    // Create a new node for the linked list
+    struct linked_list_node *new_node = (struct linked_list_node *)malloc(sizeof(struct linked_list_node));
+    new_node->data = serialized_state;  // Store the serialized state
+    new_node->next = NULL;
+
+    // If the queue is empty, the new node will be the first element
+    if (q->data.head == NULL) {
+        q->data.head = new_node;
+    } else {
+        // Otherwise, append to the end of the list
+        struct linked_list_node *temp = q->data.head;
+        while (temp->next != NULL) {
+            temp = temp->next;
+        }
+        temp->next = new_node;
+    }
 }
 
 // Dequeue a state from the queue
-struct game_state dequeue(struct queue* q) {
-    if (is_empty(q)) {
-        // If the queue is empty, return an invalid state or handle the error
-        struct game_state invalid_state;
-        invalid_state.num_steps = -1; // Or some other way to indicate an invalid state
+struct game_state dequeue(struct queue *q) {
+    // Check if the queue is empty
+    if (q->data.head == NULL) {
+        struct game_state invalid_state = {{0}}; // Return an invalid state if the queue is empty
         return invalid_state;
     }
 
-    // Get the serialized state from the front of the queue
-    uint64_t serialized_state = data[q->front];
-    
-    // Deserialize the serialized state to get the game state
-    struct game_state state = deserialize(serialized_state);
+    // Remove the first node from the linked list
+    struct linked_list_node *node_to_remove = q->data.head;
+    q->data.head = node_to_remove->next;
 
-    // Update the front of the queue
-    q->front = (q->front + 1) % MAX_QUEUE_SIZE;  // Wrap around if necessary
+    // Deserialize the serialized state from the node
+    struct game_state state = deserialize(node_to_remove->data);
+    
+    // Free the removed node
+    free(node_to_remove);
 
     return state;
 }
@@ -62,7 +49,7 @@ struct game_state dequeue(struct queue* q) {
 int number_of_moves(struct game_state start) {
     // Initialize the queue
     struct queue q;
-    init_queue(&q);
+    q.data.head = NULL;  // Initialize empty queue
 
     // Enqueue the starting state (assuming start is properly initialized)
     enqueue(&q, start);
@@ -71,7 +58,7 @@ int number_of_moves(struct game_state start) {
     int num_moves = 0;
 
     // Assuming a maximum depth or number of moves to avoid infinite loops
-    while (!is_empty(&q)) {
+    while (q.data.head != NULL) {
         struct game_state current_state = dequeue(&q);
 
         // Check if the goal is reached (this needs your own is_solved function)
