@@ -1,21 +1,21 @@
 #include "queue.h"
-#include "tile_game.h"  // For the game functions (is_solved, num_possible_moves, make_move)
-#include <stdlib.h>      // For malloc() and free()
-#include "linked_list.h" // For struct linked_list_node
+#include "tile_game.h"    // For game-related functions (is_solved, make_move, etc.)
+#include <stdlib.h>        // For malloc and free
+#include "linked_list.h"   // For struct list_node and linked list functions
 
 // Enqueue a new state into the queue
 void enqueue(struct queue *q, struct game_state state) {
     // Serialize the game state to store it in the linked list
     uint64_t serialized_state = serialize(state);
 
-    // Create a new node for the linked list
-    struct linked_list_node *new_node = (struct linked_list_node *)malloc(sizeof(struct linked_list_node));
+    // Create a new node for the linked list (using struct list_node)
+    struct list_node *new_node = (struct list_node *)malloc(sizeof(struct list_node));
     if (new_node == NULL) {
         // Handle memory allocation failure (optional)
         return;
     }
     
-    new_node->data = serialized_state;  // Store the serialized state
+    new_node->value = serialized_state;  // Store the serialized state
     new_node->next = NULL;
 
     // If the queue is empty, the new node will be the first element
@@ -23,7 +23,7 @@ void enqueue(struct queue *q, struct game_state state) {
         q->data.head = new_node;
     } else {
         // Otherwise, append to the end of the list
-        struct linked_list_node *temp = q->data.head;
+        struct list_node *temp = q->data.head;
         while (temp->next != NULL) {
             temp = temp->next;
         }
@@ -40,11 +40,11 @@ struct game_state dequeue(struct queue *q) {
     }
 
     // Remove the first node from the linked list
-    struct linked_list_node *node_to_remove = q->data.head;
+    struct list_node *node_to_remove = q->data.head;
     q->data.head = node_to_remove->next;
 
     // Deserialize the serialized state from the node
-    struct game_state state = deserialize(node_to_remove->data);
+    struct game_state state = deserialize(node_to_remove->value);
     
     // Free the removed node
     free(node_to_remove);
