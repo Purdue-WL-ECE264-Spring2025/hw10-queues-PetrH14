@@ -1,6 +1,7 @@
 #include "queue.h"
-#include "tile_game.h"  // Including tile_game.h for game-related functions
-#include <stdlib.h>      // Needed for malloc() and free()
+#include "tile_game.h"  // For the game functions (is_solved, num_possible_moves, make_move)
+#include <stdlib.h>      // For malloc() and free()
+#include "linked_list.h" // For struct linked_list_node
 
 // Enqueue a new state into the queue
 void enqueue(struct queue *q, struct game_state state) {
