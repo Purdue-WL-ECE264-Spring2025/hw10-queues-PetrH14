@@ -1,20 +1,28 @@
 #include "queue.h"
-#include "tile_game.h"    // Include tile_game.h for game-related functions
-#include <stdlib.h>        // For malloc and free
-#include "linked_list.h"   // For struct list_node and linked list functions
-#include <stdint.h>        // For uint64_t type
-#include <stdio.h>         // For printf (for debugging)
+#include "tile_game.h"
+#include <stdlib.h>
+#include "linked_list.h"
+#include <stdint.h>
+#include <stdio.h>
 
-// Check if the state already exists in the visited list
-int is_visited(struct linked_list *visited, uint64_t state) {
-    struct list_node *current = visited->head;
-    while (current != NULL) {
-        if (current->value == state) {
-            return 1;  // State is already visited
+// Check if the state is solved by comparing the tiles with the target solved state
+int is_solved(struct game_state *state) {
+    int correct[4][4] = {
+        { 1,  2,  3,  4},
+        { 5,  6,  7,  8},
+        { 9, 10, 11, 12},
+        {13, 14, 15,  0} // 0 is the empty space
+    };
+
+    for (int row = 0; row < 4; row++) {
+        for (int col = 0; col < 4; col++) {
+            if (state->tiles[row][col] != correct[row][col]) {
+                return 0; // Not solved
+            }
         }
-        current = current->next;
     }
-    return 0;  // State is not visited
+
+    return 1; // Solved
 }
 
 // Number of moves function with state exploration
@@ -27,7 +35,6 @@ int number_of_moves(struct game_state start) {
     enqueue(&q, start);
 
     // Create a set to keep track of visited states (serialized states)
-    // This will prevent revisiting the same state and causing an infinite loop
     struct linked_list visited;
     visited.head = NULL;
 
