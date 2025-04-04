@@ -1,5 +1,5 @@
 #include "queue.h"
-#include "tilegame.h"  // Including tilegame.h for game-related functions
+#include "tile_game.h"  // Including tilegame.h for game-related functions
 
 #define MAX_QUEUE_SIZE 1024
 
