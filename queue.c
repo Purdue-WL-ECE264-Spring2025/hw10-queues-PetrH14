@@ -118,82 +118,37 @@ void generate_possible_moves(struct game_state *state, struct queue *q, struct l
     // Try all four possible moves (up, down, left, right)
     
     // Move up
-    if (can_move_up(state)) {
-        move_up(&new_state);
-        if (!is_visited(visited, serialize(new_state))) {
-            add_to_visited(visited, serialize(new_state));
-            enqueue(q, new_state);
-        }
+    move_up(&new_state);
+    if (!is_visited(visited, serialize(new_state))) {
+        add_to_visited(visited, serialize(new_state));
+        enqueue(q, new_state);
     }
 
     new_state = *state;  // Reset to the original state
 
     // Move down
-    if (can_move_down(state)) {
-        move_down(&new_state);
-        if (!is_visited(visited, serialize(new_state))) {
-            add_to_visited(visited, serialize(new_state));
-            enqueue(q, new_state);
-        }
+    move_down(&new_state);
+    if (!is_visited(visited, serialize(new_state))) {
+        add_to_visited(visited, serialize(new_state));
+        enqueue(q, new_state);
     }
 
     new_state = *state;  // Reset to the original state
 
     // Move left
-    if (can_move_left(state)) {
-        move_left(&new_state);
-        if (!is_visited(visited, serialize(new_state))) {
-            add_to_visited(visited, serialize(new_state));
-            enqueue(q, new_state);
-        }
+    move_left(&new_state);
+    if (!is_visited(visited, serialize(new_state))) {
+        add_to_visited(visited, serialize(new_state));
+        enqueue(q, new_state);
     }
 
     new_state = *state;  // Reset to the original state
 
     // Move right
-    if (can_move_right(state)) {
-        move_right(&new_state);
-        if (!is_visited(visited, serialize(new_state))) {
-            add_to_visited(visited, serialize(new_state));
-            enqueue(q, new_state);
-        }
-    }
-}
-
-// Helper functions to check whether the move is within bounds
-int can_move_up(struct game_state *state) {
-    int blank_row, blank_col;
-    find_blank(state, &blank_row, &blank_col);
-    return blank_row > 0;  // Can move up if blank is not in the first row
-}
-
-int can_move_down(struct game_state *state) {
-    int blank_row, blank_col;
-    find_blank(state, &blank_row, &blank_col);
-    return blank_row < 3;  // Can move down if blank is not in the last row
-}
-
-int can_move_left(struct game_state *state) {
-    int blank_row, blank_col;
-    find_blank(state, &blank_row, &blank_col);
-    return blank_col > 0;  // Can move left if blank is not in the first column
-}
-
-int can_move_right(struct game_state *state) {
-    int blank_row, blank_col;
-    find_blank(state, &blank_row, &blank_col);
-    return blank_col < 3;  // Can move right if blank is not in the last column
-}
-
-void find_blank(struct game_state *state, int *row, int *col) {
-    for (int i = 0; i < 4; i++) {
-        for (int j = 0; j < 4; j++) {
-            if (state->tiles[i][j] == 0) {
-                *row = i;
-                *col = j;
-                return;
-            }
-        }
+    move_right(&new_state);
+    if (!is_visited(visited, serialize(new_state))) {
+        add_to_visited(visited, serialize(new_state));
+        enqueue(q, new_state);
     }
 }
 // Number of moves function (without is_solved, num_possible_moves, and make_move)
