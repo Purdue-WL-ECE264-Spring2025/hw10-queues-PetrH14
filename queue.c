@@ -1,14 +1,14 @@
 #include "queue.h"
-#include "tile_game.h"    // Include tile_game.h for game-related functions
-#include <stdlib.h>        // For malloc and free
-#include "linked_list.h"   // For struct list_node and linked list functions
+#include "tile_game.h"
+#include <stdlib.h>
+#include "linked_list.h"
 
 extern void move_up(struct game_state *state);
 extern void move_down(struct game_state *state);
 extern void move_left(struct game_state *state);
 extern void move_right(struct game_state *state);
 
-// Helper function to free a list of nodes (renamed to avoid conflict)
+// Helper function to free a list of nodes
 void free_node_list(struct list_node *head) {
     while (head != NULL) {
         struct list_node *to_free = head;
@@ -40,6 +40,11 @@ int is_solved(struct game_state *state) {
 void enqueue(struct queue *q, struct game_state state) {
     uint64_t serialized_state = serialize(state);
 
+    // Check if state is already visited before enqueuing
+    if (is_visited(&q->visited, serialized_state)) {
+        return; // Don't enqueue if state has already been visited
+    }
+
     struct list_node *new_node = (struct list_node *)malloc(sizeof(struct list_node));
     if (new_node == NULL) return;  // Handle memory allocation failure
     new_node->value = serialized_state;
@@ -53,6 +58,18 @@ void enqueue(struct queue *q, struct game_state state) {
             temp = temp->next;
         }
         temp->next = new_node;
+    }
+
+    // Add to visited states
+    add_to_visited(&q->visited, serialized_state);
+
+    // Debugging: Print the state being enqueued
+    printf("Enqueued State: \n");
+    for (int i = 0; i < 4; i++) {
+        for (int j = 0; j < 4; j++) {
+            printf("%d ", state.tiles[i][j]);
+        }
+        printf("\n");
     }
 }
 
@@ -102,7 +119,7 @@ void free_queue(struct queue *q) {
 }
 
 // Generate possible next moves and enqueue them
-void generate_possible_moves(struct game_state *state, struct queue *q, struct linked_list *visited) {
+void generate_possible_moves(struct game_state *state, struct queue *q) {
     struct game_state new_state;
     
     void (*moves[])(struct game_state*) = {move_up, move_down, move_left, move_right};
@@ -111,21 +128,18 @@ void generate_possible_moves(struct game_state *state, struct queue *q, struct l
         new_state = *state;  // Copy the current state
         moves[i](&new_state);
 
-        // Ensure the new state is not visited and is within boundaries
-        if (!is_visited(visited, serialize(new_state))) {
-            add_to_visited(visited, serialize(new_state));
-            enqueue(q, new_state);
+        if (!is_visited(&q->visited, serialize(new_state))) {
+            enqueue(q, new_state); // Enqueue new state if not visited
         }
     }
 }
 
-// Number of moves function (without is_solved, num_possible_moves, and make_move)
+// Number of moves function
 int number_of_moves(struct game_state start) {
     struct queue q = {0};
     struct linked_list visited = {0};
 
     enqueue(&q, start);
-    add_to_visited(&visited, serialize(start));
 
     int num_moves = 0;
 
@@ -139,25 +153,16 @@ int number_of_moves(struct game_state start) {
         }
 
         num_moves++;
-        generate_possible_moves(&current_state, &q, &visited);
+        generate_possible_moves(&current_state, &q);
 
-        // Debugging: Print current state and the number of visited states
-        printf("State %d: ", num_moves);
-        for (int i = 0; i < 4; i++) {
-            for (int j = 0; j < 4; j++) {
-                printf("%d ", current_state.tiles[i][j]);
-            }
-        }
-        printf("\n");
-
-        // Debugging: Print the number of visited states
-        int visited_count = 0;
-        struct list_node *node = visited.head;
+        // Debugging: Print queue size
+        int queue_size = 0;
+        struct list_node *node = q.data.head;
         while (node != NULL) {
-            visited_count++;
+            queue_size++;
             node = node->next;
         }
-        printf("Visited states: %d\n", visited_count);
+        printf("Queue size: %d\n", queue_size);
     }
 
     free_queue(&q);
