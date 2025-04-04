@@ -134,14 +134,14 @@ void generate_possible_moves(struct game_state *state, struct queue *q, struct l
             moves[i](&new_state);  // Apply the move
         }
 
+        uint64_t serialized_state = serialize(new_state);
         // After applying the move, check if the new state has already been visited
-        if (!is_visited(visited, serialize(new_state))) {
-            add_to_visited(visited, serialize(new_state));
+        if (!is_visited(visited, serialized_state)) {
+            add_to_visited(visited, serialized_state);
             enqueue(q, new_state);
         }
     }
 }
-
 // Number of moves function (without is_solved, num_possible_moves, and make_move)
 int number_of_moves(struct game_state start) {
     struct queue q = {0};
