@@ -92,22 +92,45 @@ struct game_state make_move(struct game_state state, int move) {
 
 // Function to calculate the number of moves needed to solve the puzzle
 int number_of_moves(struct game_state start) {
-    struct queue q = { .data.head = NULL };
-
+    struct queue q;
+    q.data.head = NULL;  // Initialize an empty queue (linked list)
+    
+    // Enqueue the start state with 0 moves
     enqueue(&q, start);
 
+    // Create a visited set (array) to track visited states
+    // We'll use 0 for false and 1 for true
+    int visited[1 << 15] = {0}; // We need to track up to 2^15 possible states (15 bits for serialized state)
+    
+    // Serialize the start state and mark it as visited
+    size_t serialized_start = serialize(start);
+    visited[serialized_start] = 1;
+
     while (q.data.head != NULL) {
+        // Dequeue the current state
         struct game_state current_state = dequeue(&q);
 
+        // Check if the current state is the goal state (solved puzzle)
         if (is_solved(current_state)) {
-            return current_state.num_steps;
+            return current_state.num_steps; // Return the number of moves when the goal is found
         }
 
+        // Generate possible moves and enqueue them
         for (int i = 0; i < num_possible_moves(current_state); i++) {
-            struct game_state next_state = make_move(current_state, i);
-            enqueue(&q, next_state);
+            struct game_state next_state = make_move(current_state, i); // Generate next state
+
+            // Serialize the next state and check if it has already been visited
+            size_t serialized_next = serialize(next_state);
+            if (visited[serialized_next] == 0) { // If not visited
+                // Mark the state as visited
+                visited[serialized_next] = 1;
+
+                // Enqueue the new state
+                enqueue(&q, next_state);
+            }
         }
     }
 
-    return -1;  // If the goal state is not reachable
+    // If the goal state is not reachable (shouldn't happen in a solvable puzzle)
+    return -1;  // Return -1 indicating failure or unreachable state
 }
